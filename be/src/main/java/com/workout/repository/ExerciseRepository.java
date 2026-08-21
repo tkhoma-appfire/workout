@@ -5,12 +5,18 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import com.workout.entity.Exercise;
 import com.workout.projection.WorkoutFullProjection;
 
 public interface ExerciseRepository extends JpaRepository<Exercise, UUID> {
+	@Modifying(clearAutomatically = true, flushAutomatically = true)
+	@Query("DELETE FROM Exercise e WHERE e.workout.id = :workoutId")
+	void deleteByWorkoutId(@Param("workoutId") UUID workoutId);
+
 	@Query(value = """
 		SELECT w.id as id, w.date as date,
 			w.exerciseTime as exerciseTime,

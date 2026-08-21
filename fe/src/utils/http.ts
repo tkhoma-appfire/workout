@@ -77,3 +77,19 @@ export async function addWorkout(workout: NewWorkoutFormData) {
 		throw new Error('Failed to add workout!')
 	}
 }
+
+export async function editWorkout(workout: NewWorkoutFormData & { id: string }) {
+	const response = await fetch(
+		'/api/edit_workout',
+		{
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify(workout)
+		}
+	)
+	if (!response.ok) {
+		throw new Error('Failed to edit workout!')
+	}
+}

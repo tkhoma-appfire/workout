@@ -3,9 +3,11 @@ import type { WorkoutType, YearlyWorkoutType } from "@/types"
 export function formatMonthlyChartData(payload: WorkoutType[]) {
    const shortLabel = payload.length > 12
    let chartData = payload.map((workout: WorkoutType) => {
-     let exercises = []
+     let exercises: WorkoutType["exercises"] = []
      if (workout.exercises && workout.exercises.length > 0) {
-       exercises = [...(workout.exercises || [])].sort((a, b) => a.order - b.order)
+       exercises = [...workout.exercises].sort(
+         (a, b) => (a.order ?? 0) - (b.order ?? 0),
+       )
      }
      return ({
        id: workout.id,

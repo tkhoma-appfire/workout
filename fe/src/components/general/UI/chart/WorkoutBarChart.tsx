@@ -58,7 +58,7 @@ const WorkoutBarChart = ({
 					dataKey={dataKey}
 					fill={fillColor}
 					barSize={10}
-					onClick={onBarClick}
+					onClick={(barData) => onBarClick(barData?.payload ?? barData)}
 					cursor="pointer"
 				/>
 			</BarChart>

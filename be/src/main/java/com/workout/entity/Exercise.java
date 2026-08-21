@@ -2,7 +2,6 @@ package com.workout.entity;
 
 import java.util.UUID;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -21,11 +20,11 @@ public class Exercise {
 	@GeneratedValue(strategy = GenerationType.UUID)
 	private UUID id;
 	
-	@ManyToOne(cascade = CascadeType.ALL)
+	@ManyToOne
     @JoinColumn(name = "name")
 	private ExerciseName name;
 	private Integer weight;
-	@ManyToOne(cascade = CascadeType.ALL)
+	@ManyToOne
     @JoinColumn(name = "workout_id")
 	private Workout workout;
 	@Column(name = "ex_order")

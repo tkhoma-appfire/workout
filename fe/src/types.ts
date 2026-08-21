@@ -27,13 +27,25 @@ export type NewWorkoutFormData = {
 };
 
 export type WorkoutType = {
-  exercises: any[];
+  exercises: {
+    exercise: string;
+    weight: number;
+    order?: number;
+  }[];
   id: any;
   date: any;
   xaxisLabel: string;
   time: any;
   rounds: any;
   comment: any;
+  calories?: number;
+  puls?: number;
+  maxPuls?: number;
+  intensive?: string;
+  aero?: string;
+  anaero?: string;
+  trainingLoad?: number;
+  favorite?: boolean;
 }
 
 export type YearlyWorkoutType = {

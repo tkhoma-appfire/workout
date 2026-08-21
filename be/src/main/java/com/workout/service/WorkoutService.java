@@ -10,14 +10,15 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
 import com.workout.entity.Exercise;
 import com.workout.entity.ExerciseName;
 import com.workout.entity.Flagged;
+import com.workout.entity.Workout;
 import com.workout.exception.EntityExists;
 import com.workout.mapper.SingleWorkoutMapper;
 import com.workout.mapstruct.WorkoutMapstructMapper;
@@ -73,11 +74,57 @@ public class WorkoutService {
 				return result;
 			})
 			.toList();
-		
-		System.out.println(exercises);
-		
-		if (!exercises.isEmpty())
+
+		workoutRepository.save(workout);
+
+		if (!exercises.isEmpty()) {
 			exerciseRepository.saveAll(exercises);
+		}
+	}
+
+	@Transactional
+	public void editWorkout(SingleWorkoutModel payload) {
+		if (payload.getId() == null) {
+			throw new NoSuchElementException("Workout id is required");
+		}
+
+		Workout workout = workoutRepository.findById(payload.getId())
+			.orElseThrow(() -> new NoSuchElementException("Can't find workout"));
+
+		LocalDate workoutDate = LocalDate.parse(payload.getDate());
+		if (!workout.getDate().equals(workoutDate) && workoutRepository.existsByDate(workoutDate)) {
+			throw new EntityExists("Workout already is present for: " + payload.getDate());
+		}
+
+		workout.setDate(workoutDate);
+		workout.setExerciseTime(payload.getTime());
+		workout.setCalories(payload.getCalories());
+		workout.setPuls(payload.getPuls());
+		workout.setMaxPuls(payload.getMaxPuls());
+		workout.setIntensive(payload.getIntensive());
+		workout.setAerobish(payload.getAerobish());
+		workout.setAnaerobish(payload.getAnaerobish());
+		workout.setTrainingLoad(payload.getTrainingLoad());
+		workout.setRounds(payload.getRounds());
+		workout.setComment(payload.getComment());
+
+		exerciseRepository.deleteByWorkoutId(workout.getId());
+		workoutRepository.save(workout);
+
+		List<Exercise> exercises = payload.getExercises().stream()
+			.map(exercise -> {
+				var result = new Exercise();
+				result.setName(nameRepository.upsertAndReturnId(exercise.name()));
+				result.setWeight(exercise.weight());
+				result.setWorkout(workout);
+				result.setOrder(exercise.order());
+				return result;
+			})
+			.toList();
+
+		if (!exercises.isEmpty()) {
+			exerciseRepository.saveAll(exercises);
+		}
 	}
 	
 	public WorkoutsResponse<? extends WorkoutModel> getWorkoutsPerPeriod(WorkoutsPeriod period) {

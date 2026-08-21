@@ -55,6 +55,14 @@ public class WorkoutController {
 		workoutService.addWorkout(payload);
 		return ResponseEntity.accepted().build();
 	}
+
+	@PostMapping("/edit_workout")
+	public ResponseEntity<Void> editWorkout(
+		@RequestBody SingleWorkoutModel payload
+	) {
+		workoutService.editWorkout(payload);
+		return ResponseEntity.accepted().build();
+	}
 	
 	@PostMapping("/workouts")
 	public WorkoutsResponse<? extends WorkoutModel> getWorkoutsPerPeriod(

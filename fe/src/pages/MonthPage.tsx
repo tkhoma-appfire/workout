@@ -1,11 +1,13 @@
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { FirstWorkoutContext } from "@/context/FirstWorkoutContextProvider";
 import MonthSelector from "@/components/dashboard/MonthSelector";
-import { useLoaderData, useSearchParams } from "react-router-dom";
+import { useLoaderData, useRevalidator, useSearchParams } from "react-router-dom";
 import WorkoutBarChart from "@/components/general/UI/chart/WorkoutBarChart";
 import { formatMonthlyChartData } from "@/utils/utils";
-import type { WorkoutData } from "@/types";
+import type { WorkoutData, WorkoutType } from "@/types";
 import WorkoutDetail from "@/components/general/WorkoutDetail";
+import EditWorkoutDialog from "@/components/workout/EditWorkoutDialog";
+import { resolveWorkoutSelection } from "@/utils/workoutForm";
 
 const formatMonthValue = (date: Date) =>
   new Intl.DateTimeFormat("en", {
@@ -36,12 +38,24 @@ const MonthPage = () => {
   } | undefined = useContext(FirstWorkoutContext);
   const firstWorkout = firstWorkoutState?.state.firstWorkout || '';
   const [searchParams, setSearchParams] = useSearchParams();
+  const revalidator = useRevalidator();
   const workouts: WorkoutData = useLoaderData();
+  const [editOpen, setEditOpen] = useState(false);
+  const [editingWorkout, setEditingWorkout] = useState<WorkoutType | null>(null);
 
   const chartData = formatMonthlyChartData(workouts.content);
 
-  const handleSelectBar = (data: any) => {
-    console.log("Selected bar data:", data);
+  const openEditDialog = (selection: unknown) => {
+    const workout = resolveWorkoutSelection(selection, workouts.content);
+    if (!workout) {
+      return;
+    }
+    setEditingWorkout(workout);
+    setEditOpen(true);
+  };
+
+  const handleSelectBar = (selection: unknown) => {
+    openEditDialog(selection);
   };
 
   return (
@@ -71,9 +85,18 @@ const MonthPage = () => {
       <div className="w-full mt-4 pr-2">
         <WorkoutDetail
           workouts={workouts.content}
-          selectWorkout={handleSelectBar}
+          selectWorkout={openEditDialog}
         />
       </div>
+      <EditWorkoutDialog
+        open={editOpen}
+        workout={editingWorkout}
+        onClose={() => {
+          setEditOpen(false);
+          setEditingWorkout(null);
+        }}
+        onSaved={() => revalidator.revalidate()}
+      />
     </div>
   );
 };
