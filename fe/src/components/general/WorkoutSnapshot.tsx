@@ -8,6 +8,19 @@ import {
 import { CiStar } from "react-icons/ci";
 import useHttp from '@/hooks/useHttp';
 
+const formatSnapshotDateLabel = (snapshot: { date?: string; xaxisLabel?: string }) => {
+	if (!snapshot.date) {
+		return snapshot.xaxisLabel ?? '';
+	}
+
+	const workoutYear = new Date(snapshot.date).getFullYear();
+	if (workoutYear !== new Date().getFullYear()) {
+		return `${snapshot.xaxisLabel}.${workoutYear}`;
+	}
+
+	return snapshot.xaxisLabel ?? '';
+};
+
 const ColoredCircleNumber = ({ number, colorClass = 'bg-blue-500' }:
 	{number: string, colorClass?: string}) => {
 	const match = colorClass.match(/\d+$/);
@@ -26,26 +39,6 @@ const ColoredCircleNumber = ({ number, colorClass = 'bg-blue-500' }:
   )
 }
 
-const colors = [
-	'bg-orange-100',
-	'bg-orange-200',
-	'bg-orange-300',
-	'bg-orange-400',
-	'bg-orange-500',
-	'bg-orange-600',
-	'bg-orange-700',
-	'bg-orange-800',
-	'bg-orange-900',
-	'bg-green-100',
-	'bg-green-200',
-	'bg-green-300',
-	'bg-green-400',
-	'bg-green-500',
-	'bg-green-600',
-	'bg-green-700',
-	'bg-green-800',
-	'bg-green-900',
-]
 const shades = [ 100, 200, 300, 400, 500, 600, 700, 800, 900 ]
 
 function colorShade(num: number, color: 'green' | 'orange', min: number, max: number) {
@@ -104,6 +97,8 @@ export default function WorkoutSnapshot({
 		null
 	)
 
+	console.log(workout);
+
 	const handleSelect = (snapshot: { id: any; }, checked: boolean) => {
 		onSelect(snapshot, checked)
 		if (checked) {
@@ -149,7 +144,7 @@ export default function WorkoutSnapshot({
 					<CiStar className={starClasses} />
 				</span>
 				<div key="label" className="pl-2">
-					{snapshot.xaxisLabel}
+					{formatSnapshotDateLabel(snapshot)}
 				</div>
 			</div>
 			<ColoredCircleNumber
