@@ -1,0 +1,153 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Workout App Architecture",
+    "quality_profile": "showcase",
+    "output": "workout-architecture.html",
+    "views": [
+      {
+        "id": "request-path",
+        "label": "Primary request path",
+        "focus": ["user", "nginx", "fe", "be", "postgres"],
+        "note": "Browser traffic enters through nginx, the React SPA calls /api, and Spring Boot persists to PostgreSQL."
+      },
+      {
+        "id": "frontend-pages",
+        "label": "Frontend surface",
+        "focus": ["fe", "nginx", "be"],
+        "note": "Month, week, year, search, favorites, and add-workout pages all use fetch against /api."
+      }
+    ]
+  },
+  "components": [
+    {
+      "id": "user",
+      "type": "external",
+      "label": "User",
+      "sublabel": "Browser",
+      "pos": [40, 300],
+      "size": [120, 60]
+    },
+    {
+      "id": "nginx",
+      "type": "cloud",
+      "label": "nginx_proxy",
+      "sublabel": "reverse proxy :80",
+      "pos": [230, 300],
+      "size": [140, 60]
+    },
+    {
+      "id": "fe",
+      "type": "frontend",
+      "label": "fe_desktop",
+      "sublabel": "React 19 / Vite",
+      "pos": [460, 170],
+      "size": [150, 64],
+      "tag": "SPA"
+    },
+    {
+      "id": "be",
+      "type": "backend",
+      "label": "be",
+      "sublabel": "Spring Boot 3.5",
+      "pos": [460, 390],
+      "size": [150, 64],
+      "tag": "WorkoutController"
+    },
+    {
+      "id": "postgres",
+      "type": "database",
+      "label": "PostgreSQL 15",
+      "sublabel": "workoutdb",
+      "pos": [720, 390],
+      "size": [150, 64]
+    },
+    {
+      "id": "flyway",
+      "type": "backend",
+      "label": "Flyway",
+      "sublabel": "schema migrations",
+      "pos": [720, 170],
+      "size": [150, 60]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "Docker Compose",
+      "wraps": ["nginx", "fe", "be", "postgres", "flyway"]
+    }
+  ],
+  "connections": [
+    {
+      "id": "user-to-nginx",
+      "from": "user",
+      "to": "nginx",
+      "label": "HTTP :80",
+      "variant": "emphasis"
+    },
+    {
+      "id": "nginx-to-fe",
+      "from": "nginx",
+      "to": "fe",
+      "label": "/"
+    },
+    {
+      "id": "nginx-to-be",
+      "from": "nginx",
+      "to": "be",
+      "label": "/api/*"
+    },
+    {
+      "id": "fe-to-be",
+      "from": "fe",
+      "to": "be",
+      "label": "fetch /api/*",
+      "labelDy": 24
+    },
+    {
+      "id": "be-to-postgres",
+      "from": "be",
+      "to": "postgres",
+      "label": "JPA / JDBC"
+    },
+    {
+      "id": "flyway-to-postgres",
+      "from": "flyway",
+      "to": "postgres",
+      "label": "migrate",
+      "variant": "dashed",
+      "labelDy": 24
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Frontend",
+      "items": [
+        "React Router pages: month, week, year, search, favorites, add",
+        "Charts via Recharts; calendar via FullCalendar",
+        "API helpers in fe/src/utils/http.ts"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Backend",
+      "items": [
+        "WorkoutController exposes REST at /api",
+        "WorkoutService, aggregators, and JPA repositories",
+        "Tables: workout, exercise, exercise_name, favorite, flagged"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Operations",
+      "items": [
+        "nginx routes / to Vite and /api/ to Spring Boot",
+        "Flyway applies V1–V6 migrations on startup",
+        "CSV import/export via AdminPanelContent"
+      ]
+    }
+  ]
+}

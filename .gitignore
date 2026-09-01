@@ -7,3 +7,5 @@ build/
 .vscode/
 .idea/
 postgres-data/
+.agents/
+skills-lock.json
