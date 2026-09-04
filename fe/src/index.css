@@ -32,9 +32,21 @@
 	background-color: #0069a8;
 }
 
-.recharts-surface:focus {
+.recharts-wrapper,
+.recharts-wrapper *,
+.recharts-surface,
+.recharts-surface * {
 	outline: none;
-	box-shadow: 0 0 0 2px #0084d1;
+	box-shadow: none;
+}
+
+.recharts-tooltip-cursor {
+	display: none;
+}
+
+.recharts-active-bar,
+.recharts-active-shape {
+	stroke: none;
 }
 
 .fc .fc-daygrid-body-unbalanced .fc-daygrid-day-events {

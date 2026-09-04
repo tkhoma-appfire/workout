@@ -38,7 +38,11 @@ const WorkoutBarChart = ({
 			height={300}
 			style={{ outline: 'none' }}
 		>
-			<BarChart data={payload} margin={{ top: 20 }}>
+			<BarChart
+				data={payload}
+				margin={{ top: 20 }}
+				accessibilityLayer={false}
+			>
 				<CartesianGrid strokeDasharray="3 3" />
 				<XAxis dataKey="label" />
 				<YAxis
@@ -48,6 +52,7 @@ const WorkoutBarChart = ({
 					tickFormatter={tickFormatter}
 				/>
 				<Tooltip
+					cursor={false}
 					content={isYear ? <CustomizedYearlyTooltip />
 					: <CustomizedMonthlyTooltip />}
 				/>
