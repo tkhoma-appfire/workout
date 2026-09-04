@@ -75,6 +75,13 @@ export type YearlyWorkoutData = {
   totalElements: number;
 };
 
+export type YearPageLoaderData = {
+  year: number;
+  compareYear: number | null;
+  current: YearlyWorkoutData;
+  comparison: YearlyWorkoutData | null;
+};
+
 export type WeekSelectOption = { value: string; label: string };
 
 export type WeekPageLoaderData = WorkoutData & {

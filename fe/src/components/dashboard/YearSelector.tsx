@@ -2,8 +2,11 @@ import { Select } from "antd";
 
 type YearSelectorProps = {
     startDate: string;
-    value: string;
-    onChange: (newYear: string) => void;
+    value?: string;
+    onChange: (newYear?: string) => void;
+    allowClear?: boolean;
+    placeholder?: string;
+    excludeYear?: string;
 };
 
 function getYearOptions(startDate: string) {
@@ -14,19 +17,29 @@ function getYearOptions(startDate: string) {
     return result;
 }
 
-const YearSelector = ({ startDate, value, onChange }: YearSelectorProps) => {
+const YearSelector = ({
+    startDate,
+    value,
+    onChange,
+    allowClear = false,
+    placeholder,
+    excludeYear
+}: YearSelectorProps) => {
     let options = getYearOptions(startDate);
     options = options.reverse();
+    if (excludeYear) {
+        options = options.filter((option) => option.value !== excludeYear);
+    }
 
     return (
-        <div className="mb-4 mt-16 flex justify-center">
         <Select
             style={{ width: 220 }}
             options={options}
             value={value}
             onChange={(v) => onChange(v)}
+            allowClear={allowClear}
+            placeholder={placeholder}
         />
-        </div>
     );
 };
 

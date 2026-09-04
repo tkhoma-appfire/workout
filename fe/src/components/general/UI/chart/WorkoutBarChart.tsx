@@ -8,8 +8,15 @@ import {
 	Legend,
 	ResponsiveContainer
 } from 'recharts'
+import type { ReactElement } from 'react'
 import CustomizedMonthlyTooltip from './CustomizedMonthlyTooltip'
 import CustomizedYearlyTooltip from './CustomizedYearlyTooltip'
+
+export type CompareSeries = {
+	dataKey: string;
+	legendLabel: string;
+	fillColor?: string;
+};
 
 const WorkoutBarChart = ({
 	payload,
@@ -20,7 +27,9 @@ const WorkoutBarChart = ({
 	legendFormatter = () => 'Training Time',
 	fillColor = "#74d4ff",
 	dataKey = "value",
-	tickFormatter = (value: any) => value
+	tickFormatter = (value: any) => value,
+	compare,
+	tooltipContent
 }: {
 	payload: any[];
 	onBarClick: (data: any) => void;
@@ -31,7 +40,10 @@ const WorkoutBarChart = ({
 	fillColor?: string;
 	dataKey?: string;
 	tickFormatter?: (value: any) => string;
+	compare?: CompareSeries;
+	tooltipContent?: ReactElement;
 }) => {
+	const barSize = compare ? 8 : 10
 	return (
 		<ResponsiveContainer
 			width="100%"
@@ -53,19 +65,30 @@ const WorkoutBarChart = ({
 				/>
 				<Tooltip
 					cursor={false}
-					content={isYear ? <CustomizedYearlyTooltip />
-					: <CustomizedMonthlyTooltip />}
+					content={tooltipContent ?? (isYear ? <CustomizedYearlyTooltip />
+					: <CustomizedMonthlyTooltip />)}
 				/>
 				<Legend
-					formatter={legendFormatter}
+					formatter={(value: any) => value}
 				/>
 				<Bar
 					dataKey={dataKey}
+					name={legendFormatter(dataKey)}
 					fill={fillColor}
-					barSize={10}
+					barSize={barSize}
 					onClick={(barData) => onBarClick(barData?.payload ?? barData)}
 					cursor="pointer"
 				/>
+				{compare && (
+					<Bar
+						dataKey={compare.dataKey}
+						name={compare.legendLabel}
+						fill={compare.fillColor ?? "#94a3b8"}
+						barSize={barSize}
+						onClick={(barData) => onBarClick(barData?.payload ?? barData)}
+						cursor="pointer"
+					/>
+				)}
 			</BarChart>
 		</ResponsiveContainer>
 	)
