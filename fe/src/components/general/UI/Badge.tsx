@@ -16,6 +16,18 @@ const greenShades = [
     'bg-green-900',
 ];
 
+// if this variable is removed, orange shades will not be compiled to result css
+const orangeShades = [
+  'bg-orange-200',
+  'bg-orange-300',
+  'bg-orange-400',
+  'bg-orange-500',
+  'bg-orange-600',
+  'bg-orange-700',
+  'bg-orange-800',
+  'bg-orange-900',
+];
+
 function colorShade(num: number | undefined, min: number, max: number) {
     let colors = greenShades
     if (num === undefined || num == null) return colors[0]

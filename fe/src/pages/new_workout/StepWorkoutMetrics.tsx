@@ -1,4 +1,5 @@
 import type { NewWorkoutFormData } from "../../types";
+import { formatMmSsInput, isAllowedMmSsInput } from "@/utils/timeFormat";
 
 type StepWorkoutMetricsProps = {
   formData: NewWorkoutFormData;
@@ -10,17 +11,9 @@ type StepWorkoutMetricsProps = {
 
 const StepWorkoutMetrics = ({ formData, updateField }: StepWorkoutMetricsProps) => {
   const handleTimeChange = (name: "intensive" | "aero" | "anaero", value: string) => {
-    if (/^\d{0,4}$/.test(value.replace(':', '')) || /^\d{1,2}:\d{0,2}$/.test(value)) {
-      const formatted = formatTime(value);
-      updateField(name as keyof NewWorkoutFormData, formatted);
+    if (isAllowedMmSsInput(value)) {
+      updateField(name as keyof NewWorkoutFormData, formatMmSsInput(value));
     }
-  };
-
-  const formatTime = (val: string) => { 
-    const digits = val.replace(/\D/g, '').slice(0, 4);
-    const minutes = digits.slice(0, digits.length - 2) || '0';
-    const seconds = digits.slice(-2).padStart(2, '0');
-    return `${parseInt(minutes, 10)}:${seconds}`;
   };
 
   return (

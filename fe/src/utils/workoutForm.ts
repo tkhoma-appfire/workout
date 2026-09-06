@@ -1,4 +1,5 @@
 import type { NewWorkoutFormData, WorkoutType } from "@/types";
+import { createDefaultRounds, isValidRounds } from "@/utils/rounds";
 
 type WorkoutLike = Partial<WorkoutType> & {
   payload?: Partial<WorkoutType>;
@@ -15,7 +16,7 @@ const emptyFormData = (): NewWorkoutFormData => ({
   trainingLoad: 0,
   exercises: [],
   date: "",
-  rounds: "",
+  rounds: createDefaultRounds(),
   comment: "",
 });
 
@@ -110,7 +111,7 @@ export function validateWorkoutStep(
   if (step === 2) {
     return (
       formData.date.trim() !== ""
-      && formData.rounds.trim() !== ""
+      && isValidRounds(formData.rounds)
       && formData.comment.trim() !== ""
     );
   }

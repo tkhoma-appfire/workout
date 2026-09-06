@@ -7,6 +7,7 @@ import StepBasicInfo from "./StepBasicInfo";
 import type { ExerciseNameOption, NewWorkoutFormData } from "../../types";
 import { format } from 'date-fns'
 import { addWorkout, fetchWorkoutTemplate } from "@/utils/http";
+import { createDefaultRounds, isValidRounds } from "@/utils/rounds";
 import { CalendarContext } from "@/context/CalendarContextProvider";
 import { CurrentPeriodContext } from "@/context/CurrentPeriodContextProvider";
 const steps = ["Workout Metrics", "Exercises", "Basic Info"];
@@ -32,7 +33,7 @@ const NewWorkoutPage = () => {
     trainingLoad: 0,
     exercises: [],
     date: currentDate,
-    rounds: "",
+    rounds: createDefaultRounds(),
     comment: "",
   }));
 
@@ -62,7 +63,7 @@ const NewWorkoutPage = () => {
       return formData.exercises.length > 0 && formData.exercises.every((e) => e.exercise.trim() !== "" && e.weight >= 0);
     }
     if (currentStep === 2) {
-      return formData.date.trim() !== "" && formData.rounds.trim() !== "" && formData.comment.trim() !== "";
+      return formData.date.trim() !== "" && isValidRounds(formData.rounds) && formData.comment.trim() !== "";
     }
     return true;
   };

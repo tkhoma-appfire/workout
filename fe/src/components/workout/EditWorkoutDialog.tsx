@@ -138,7 +138,7 @@ const EditWorkoutDialog = ({ open, workout, onClose, onSaved }: EditWorkoutDialo
       open={open}
       onCancel={onClose}
       width={920}
-      destroyOnClose
+      destroyOnHidden
       footer={[
         <button
           key="cancel"

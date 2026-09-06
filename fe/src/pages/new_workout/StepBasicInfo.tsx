@@ -1,3 +1,4 @@
+import RoundsInput from "@/components/workout/RoundsInput";
 import type { NewWorkoutFormData } from "../../types";
 
 type StepBasicInfoProps = {
@@ -14,12 +15,9 @@ const StepBasicInfo = ({ formData, updateField }: StepBasicInfoProps) => {
     <div className="grid grid-cols-1 px-16">
       <label className="flex flex-col gap-2">
         <span className="text-sm font-medium text-slate-700">Rounds</span>
-        <input
-          type="text"
+        <RoundsInput
           value={formData.rounds}
-          onChange={(e) => updateField("rounds", e.target.value)}
-          placeholder="3x10"
-          className="rounded-md border border-slate-300 px-3 py-2 outline-none focus:border-sky-500"
+          onChange={(rounds) => updateField("rounds", rounds)}
         />
       </label>
     </div>
@@ -30,7 +28,7 @@ const StepBasicInfo = ({ formData, updateField }: StepBasicInfoProps) => {
           value={formData.comment}
           onChange={(e) => updateField("comment", e.target.value)}
           rows={4}
-          placeholder="e.g. 3x10 squats, 5km run..."
+          placeholder="e.g. добавляти 2к..."
           className="rounded-md border border-slate-300 px-3 py-2 outline-none focus:border-sky-500"
         />
       </label>

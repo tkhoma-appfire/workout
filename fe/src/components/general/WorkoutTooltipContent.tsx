@@ -1,3 +1,5 @@
+import { formatRoundsDisplay } from "@/utils/rounds";
+
 type Exercise = {
 	order: number;
 	exercise: string;
@@ -21,7 +23,7 @@ export default function WorkoutTooltipContent({ item }: WorkoutTooltipContentPro
 			<p className="mb-2 text-sx">
 				<span className="font-bold">Training Time:</span> {item.time} minutes
 			</p>
-			<p className="text-[0.65rem] my-2">{item.rounds}</p>
+			<p className="text-[0.65rem] my-2">{formatRoundsDisplay(item.rounds)}</p>
 			<div className="ml-4">
 				{sortedExercises.map((entry, index) => (
 					<p className="text-xs" key={index}>
