@@ -7,7 +7,7 @@ import type { YearPageLoaderData, YearlyWorkoutData } from "@/types";
 import WorkoutBarChart from "@/components/general/UI/chart/WorkoutBarChart";
 import type { CompareSeries } from "@/components/general/UI/chart/WorkoutBarChart";
 import CustomizedYearComparisonTooltip from "@/components/general/UI/chart/CustomizedYearComparisonTooltip";
-import { formatYearlyChartData, mergeYearlyChartData } from "@/utils/utils";
+import { formatYearlyChartData, formatGroupedNumber, mergeYearlyChartData } from "@/utils/utils";
 import { MdClear } from "react-icons/md";
 
 const ticks = [0, 90, 180, 270, 360, 450, 540, 630, 720];
@@ -201,9 +201,9 @@ const YearPage = () => {
         )
         : (
           <div className="flex justify-evenly w-full font-semibold text-lg px-16 mt-4">
-            <div>{current.statistics.exerciseTime}</div>
-            <div>{current.statistics.calories} ccal</div>
-            <div>{current.totalElements} workouts</div>
+            <div className="whitespace-nowrap">{current.statistics.exerciseTime}</div>
+            <div className="whitespace-nowrap">{formatGroupedNumber(current.statistics.calories)} ccal</div>
+            <div className="whitespace-nowrap">{current.totalElements} workouts</div>
           </div>
         )}
       <div className="mt-4 flex min-h-0 w-full flex-1 flex-col px-2 pb-8">
@@ -219,10 +219,10 @@ const YearPage = () => {
 
 const StatisticsRow = ({ year, workouts }: { year: number; workouts: YearlyWorkoutData }) => (
   <div className="flex w-full justify-evenly">
-    <div className="text-gray-500">{year}</div>
-    <div>{workouts.statistics.exerciseTime}</div>
-    <div>{workouts.statistics.calories} ccal</div>
-    <div>{workouts.totalElements} workouts</div>
+    <div className="text-gray-500 whitespace-nowrap">{year}</div>
+    <div className="whitespace-nowrap">{workouts.statistics.exerciseTime}</div>
+    <div className="whitespace-nowrap">{formatGroupedNumber(workouts.statistics.calories)} ccal</div>
+    <div className="whitespace-nowrap">{workouts.totalElements} workouts</div>
   </div>
 );
 

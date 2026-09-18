@@ -1,5 +1,30 @@
 import type { WorkoutType, YearlyWorkoutType } from "@/types"
 
+export function formatGroupedNumber(value: unknown): string {
+  if (value == null || value === "") {
+    return "0";
+  }
+
+  const numeric = typeof value === "number"
+    ? value
+    : Number(String(value).replace(/\s/g, ""));
+
+  if (!Number.isFinite(numeric)) {
+    return String(value);
+  }
+
+  const absolute = Math.trunc(Math.abs(numeric));
+  const digits = String(absolute);
+  const parts: string[] = [];
+
+  for (let index = digits.length; index > 0; index -= 3) {
+    parts.unshift(digits.slice(Math.max(0, index - 3), index));
+  }
+
+  const grouped = parts.join("\u00a0");
+  return numeric < 0 ? `-${grouped}` : grouped;
+}
+
 export function formatMonthlyChartData(payload: WorkoutType[]) {
    const shortLabel = payload.length > 12
    let chartData = payload.map((workout: WorkoutType) => {

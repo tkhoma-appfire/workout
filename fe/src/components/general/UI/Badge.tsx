@@ -3,11 +3,9 @@ import { useContext } from "react"
 import { SlBadge } from 'react-icons/sl';
 
 const greenShades = [
-    'bg-yellow-200',
-    'bg-yellow-300',
-    'bg-yellow-400',
-    'bg-yellow-500',
-    'bg-yellow-600',
+    'bg-green-100',
+    'bg-green-200',
+    'bg-green-300',
     'bg-green-400',
     'bg-green-500',
     'bg-green-600',
@@ -18,6 +16,7 @@ const greenShades = [
 
 // if this variable is removed, orange shades will not be compiled to result css
 const orangeShades = [
+  'bg-orange-100',
   'bg-orange-200',
   'bg-orange-300',
   'bg-orange-400',

@@ -201,7 +201,7 @@ const RoundsInput = ({ value, onChange }: RoundsInputProps) => {
                 onChange={(event) => {
                   const nextType = event.target.value;
                   if (nextType === "progressive") {
-                    updateBlock(index, { type: "progressive", from: 1, to: 11 });
+                    updateBlock(index, { type: "progressive", from: 1, to: 10 });
                     return;
                   }
 

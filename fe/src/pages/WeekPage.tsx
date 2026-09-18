@@ -6,7 +6,7 @@ import { buildWeekSelectOptions, resolveSelectedWeekValue } from "@/utils/weekSe
 import { fetchFirstWorkoutDate } from "@/utils/http";
 import { useLoaderData, useSearchParams } from "react-router-dom";
 import type { WeekPageLoaderData } from "@/types";
-import { formatMonthlyChartData } from "@/utils/utils";
+import { formatMonthlyChartData, formatGroupedNumber } from "@/utils/utils";
 import WorkoutDetail from "@/components/general/WorkoutDetail";
 import WorkoutBarChart from "@/components/general/UI/chart/WorkoutBarChart";
 import WeekSelector from "@/components/dashboard/WeekSelector";
@@ -44,9 +44,9 @@ const WeekPage = () => {
         }}
       />
       <div className="flex justify-evenly w-full font-semibold text-lg px-16 mt-4">
-        <div>{workouts.statistics.exerciseTime}</div>
-        <div>{workouts.statistics.calories} ccal</div>
-        <div>{workouts.totalElements} workouts</div>
+        <div className="whitespace-nowrap">{workouts.statistics.exerciseTime}</div>
+        <div className="whitespace-nowrap">{formatGroupedNumber(workouts.statistics.calories)} ccal</div>
+        <div className="whitespace-nowrap">{workouts.totalElements} workouts</div>
       </div>
       <div className="w-full mt-4 pr-2">
         <WorkoutBarChart

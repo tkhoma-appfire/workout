@@ -13,13 +13,13 @@ const StepBasicInfo = ({ formData, updateField }: StepBasicInfoProps) => {
   return (
     <>
     <div className="grid grid-cols-1 px-16">
-      <label className="flex flex-col gap-2">
+      <div className="flex flex-col gap-2">
         <span className="text-sm font-medium text-slate-700">Rounds</span>
         <RoundsInput
           value={formData.rounds}
           onChange={(rounds) => updateField("rounds", rounds)}
         />
-      </label>
+      </div>
     </div>
     <div className="grid grid-cols-1 px-16 mt-4">
       <label className="flex flex-col gap-2">

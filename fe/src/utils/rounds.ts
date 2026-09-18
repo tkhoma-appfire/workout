@@ -132,6 +132,7 @@ export function serializeRounds(data: RoundsData): string {
     weights: data.weights,
     blocks: data.blocks,
     ...(data.useWeights === false ? { useWeights: false } : {}),
+    ...(data.useTimePerEx === false ? { useTimePerEx: false } : {}),
     ...(data.useTimePerEx ? { useTimePerEx: true } : {}),
     ...(data.timePerEx ? { timePerEx: data.timePerEx } : {}),
     ...(data.rest ? { rest: data.rest } : {}),
@@ -178,15 +179,19 @@ export function formatRoundsData(data: RoundsData): string {
 
   let result = "";
   if (weights.length > 0) {
-    const weightsText = formatWeights(weights) + "кг,";
+    const weightsText = weights.length === 1
+      ? `${weights[0]}кг`
+      : `${formatWeights(weights)}кг`;
     result = showTimePerEx
-      ? `${weightsText}, ${data.timePerEx}/вправа`
-      : `${weightsText}.`;
+      ? `${weightsText}, ${data.timePerEx}/вп;`
+      : `${weightsText};`;
   } else if (showTimePerEx) {
-    result = `${data.timePerEx}/вправа`;
+    result = `${data.timePerEx}/вп;`;
   }
   if (blocksText) {
     result = result ? `${result} ${blocksText}` : blocksText;
+  } else {
+    result = result.replace(/\/вп;/, "/вп");
   }
   if (data.rest?.duration) {
     const restText = formatRest(data.rest);
