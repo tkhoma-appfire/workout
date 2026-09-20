@@ -4,9 +4,8 @@ FROM node:22-alpine AS build
 
 WORKDIR /app/be-node
 
-COPY be-node/package.json ./
-RUN npm config set registry https://registry.npmjs.org \
-  && npm install
+COPY be-node/package.json be-node/package-lock.json be-node/.npmrc ./
+RUN npm ci
 
 COPY be-node/tsconfig.json ./
 COPY be-node/src ./src
