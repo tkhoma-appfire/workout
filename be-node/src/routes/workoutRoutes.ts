@@ -7,7 +7,9 @@ import { getCurrentPeriodWorkouts } from "../services/currentPeriodService.js";
 import { upsertFlagged } from "../services/flaggedService.js";
 import { getFavoriteWorkouts, toggleFavorite } from "../services/favoriteService.js";
 import { getFirstWorkoutDate } from "../services/firstWorkoutService.js";
+import { exportCsv } from "../services/exportService.js";
 import { importCsv } from "../services/importService.js";
+import { searchWorkouts } from "../services/searchService.js";
 import { getWorkoutsPerPeriod } from "../services/workoutResponseBuilder.js";
 import type { DateRange, WorkoutsPeriod } from "../types/workout.js";
 
@@ -68,6 +70,24 @@ export function createWorkoutRoutes(pool: Pool): Router {
     }
   });
 
+  router.get("/export/csv", async (_req, res) => {
+    try {
+      const content = await exportCsv(pool);
+      if (!content) {
+        res.status(404).send();
+        return;
+      }
+
+      res.setHeader("Content-Type", "application/octet-stream");
+      res.setHeader("Content-Disposition", 'attachment; filename="workout.zip"');
+      res.setHeader("Content-Length", content.length);
+      res.send(content);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Failed to export workouts";
+      res.status(500).json({ error: message });
+    }
+  });
+
   router.post("/import/csv", upload.single("file"), async (req, res) => {
     try {
       if (!req.file) {
@@ -105,6 +125,20 @@ export function createWorkoutRoutes(pool: Pool): Router {
       res.json(favorites);
     } catch (error) {
       const message = error instanceof Error ? error.message : "Failed to load favorites";
+      res.status(500).json({ error: message });
+    }
+  });
+
+  router.get("/search", async (req, res) => {
+    try {
+      const exercises = typeof req.query.exercises === "string"
+        ? req.query.exercises
+        : undefined;
+      const onlySelected = req.query.onlySelected === "true";
+      const workouts = await searchWorkouts(pool, exercises, onlySelected);
+      res.json(workouts);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Failed to search workouts";
       res.status(500).json({ error: message });
     }
   });

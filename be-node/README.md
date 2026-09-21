@@ -226,6 +226,26 @@ curl http://localhost:8081/api/first_workout_date
 
 ---
 
+### `GET /api/export/csv`
+
+Exports all workouts as a ZIP file containing `workouts.csv` (same format used by import).
+
+**Response `200`**
+
+Binary `application/octet-stream` attachment (`workout.zip`).
+
+**Response `404`**
+
+No workouts in the database.
+
+**Example**
+
+```bash
+curl -O -J http://localhost:8081/api/export/csv
+```
+
+---
+
 ### `POST /api/import/csv`
 
 Imports workouts from a ZIP file containing `workouts.csv` (same format as export).
@@ -245,6 +265,33 @@ Skips workouts whose date already exists in the database.
 ```bash
 curl -X POST http://localhost:8081/api/import/csv \
   -F "file=@workouts.zip"
+```
+
+---
+
+### `GET /api/search`
+
+Search workouts by exercise names. Returns up to 10 results.
+
+**Query parameters**
+
+| Param | Type | Default | Description |
+|-------|------|---------|-------------|
+| `exercises` | `string` | — | Comma-separated exercise names |
+| `onlySelected` | `boolean` | `false` | When `true`, workout must contain exactly the selected exercises (no extras) |
+
+With no `exercises` param, returns the 10 most recent workouts.
+
+**Response `200`**
+
+Array of `SingleWorkoutModel`.
+
+**Example**
+
+```bash
+curl "http://localhost:8081/api/search"
+curl "http://localhost:8081/api/search?exercises=swing,press"
+curl "http://localhost:8081/api/search?exercises=swing&onlySelected=true"
 ```
 
 ---
