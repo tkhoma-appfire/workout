@@ -48,3 +48,29 @@ export async function findWorkoutsForPeriod(
 
   return result.rows;
 }
+
+export async function findFirstWorkoutDate(pool: Pool): Promise<string | null> {
+  const result = await pool.query<{ first_date: Date | null }>(
+    "SELECT MIN(date) AS first_date FROM workout",
+  );
+
+  const date = result.rows[0]?.first_date;
+  if (!date) {
+    return null;
+  }
+
+  return date.toISOString().slice(0, 10);
+}
+
+export async function findCurrentMonthCalories(pool: Pool): Promise<number> {
+  const result = await pool.query<{ total: string }>(
+    `
+      SELECT COALESCE(SUM(calories), 0) AS total
+      FROM workout
+      WHERE date >= date_trunc('month', CURRENT_DATE)::date
+        AND date < (date_trunc('month', CURRENT_DATE) + interval '1 month')::date
+    `,
+  );
+
+  return Number(result.rows[0]?.total ?? 0);
+}

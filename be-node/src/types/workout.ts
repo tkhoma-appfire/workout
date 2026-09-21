@@ -72,3 +72,17 @@ export type DateRange = {
   startDate: string;
   endDate: string;
 };
+
+export type CalendarEventModel = {
+  id: string;
+  date: string;
+  trainingLoad: number | null;
+  calories: number | null;
+};
+
+export type CurrentPeriodWorkouts = {
+  currentWeek: CalendarEventModel[];
+  prevWeek: CalendarEventModel[];
+  statistics: WorkoutStatistics;
+  monthCalories: number;
+};

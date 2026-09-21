@@ -5,7 +5,14 @@ import { createWorkoutRoutes } from "./routes/workoutRoutes.js";
 export function createApp(pool: Pool) {
   const app = express();
 
-  app.use(express.json());
+  app.use((req, res, next) => {
+    if (req.path === "/api/add_flagged") {
+      express.text({ type: "*/*" })(req, res, next);
+      return;
+    }
+
+    express.json()(req, res, next);
+  });
   app.use("/api", createWorkoutRoutes(pool));
 
   app.get("/health", async (_req, res) => {
