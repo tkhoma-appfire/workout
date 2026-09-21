@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { NavLink } from 'react-router-dom'
+import { useState, type ReactNode } from 'react'
+import { NavLink, type NavLinkRenderProps } from 'react-router-dom'
 import {
 	MdImageSearch,
 	MdFavoriteBorder,
@@ -14,6 +14,16 @@ import { GrOverview } from 'react-icons/gr'
 import Button from '@/components/general/UI/Button'
 import AdminPanelContent from '@/components/general/AdminPanelContent'
 import { RiCloseFill } from 'react-icons/ri'
+
+function renderNavLink(icon: ReactNode, label: string) {
+  return ({ isActive }: NavLinkRenderProps) => (
+    <>
+      <span className="text-white hover:text-sky-200">{icon}</span>
+      <span className="text-white hover:text-sky-200">{label}</span>
+      {isActive ? <TiTickOutline className="text-white hover:text-sky-200" /> : null}
+    </>
+  );
+}
 
 export default function NavigationSidebar() {
   const [isOpenPanel, setIsOpenPanel] = useState(false)
@@ -34,34 +44,25 @@ export default function NavigationSidebar() {
 				<NavLink
 					to="/week"
 					className="flex items-center space-x-2"
-					children={({isActive}) => (
-						<>
-							<MdOutlineCalendarViewWeek className="text-white hover:text-sky-200" />
-							<span className="text-white hover:text-sky-200">Week</span>
-							{isActive ? <TiTickOutline className="text-white hover:text-sky-200" /> : null}
-						</>
+					children={renderNavLink(
+						<MdOutlineCalendarViewWeek className="text-white hover:text-sky-200" />,
+						'Week',
 					)}
 				/>
 				<NavLink
 					to="/month"
 					className="flex items-center space-x-2"
-					children={({isActive}) => (
-						<>
-							<MdOutlineCalendarViewMonth className="text-white hover:text-sky-200" />
-							<span className="text-white hover:text-sky-200">Month</span>
-							{isActive ? <TiTickOutline className="text-white hover:text-sky-200" /> : null}
-						</>
+					children={renderNavLink(
+						<MdOutlineCalendarViewMonth className="text-white hover:text-sky-200" />,
+						'Month',
 					)}
 				/>
 				<NavLink
 					to="/year"
 					className="flex items-center space-x-2"
-					children={({isActive}) => (
-						<>
-							<GiCalendarHalfYear className="text-white hover:text-sky-200" />
-							<span className="text-white hover:text-sky-200">Year</span>
-							{isActive ? <TiTickOutline className="text-white hover:text-sky-200" /> : null}
-						</>
+					children={renderNavLink(
+						<GiCalendarHalfYear className="text-white hover:text-sky-200" />,
+						'Year',
 					)}
 				/>
 			</div>
@@ -70,34 +71,25 @@ export default function NavigationSidebar() {
 				<NavLink
 					to="/search"
 					className="flex items-center space-x-2"
-					children={({isActive}) => (
-						<>
-							<MdImageSearch className="text-white hover:text-sky-200" />
-							<span className="text-white hover:text-sky-200">Search</span>
-							{isActive ? <TiTickOutline className="text-white hover:text-sky-200" /> : null}
-						</>
+					children={renderNavLink(
+						<MdImageSearch className="text-white hover:text-sky-200" />,
+						'Search',
 					)}
 				/>
 				<NavLink
 					to="/favorite"
 					className="flex items-center space-x-2"
-					children={({isActive}) => (
-						<>
-							<MdFavoriteBorder className="text-white hover:text-sky-200" />
-							<span className="text-white hover:text-sky-200">Favorite</span>
-							{isActive ? <TiTickOutline className="text-white hover:text-sky-200" /> : null}
-						</>
+					children={renderNavLink(
+						<MdFavoriteBorder className="text-white hover:text-sky-200" />,
+						'Favorite',
 					)}
 				/>
 				<NavLink
 					to="/add"
 					className="flex items-center space-x-2"
-					children={({isActive}) => (
-						<>
-							<MdOutlineBookmarkAdd className="text-white hover:text-sky-200" />
-							<span className="text-white hover:text-sky-200">Add Workout</span>
-							{isActive ? <TiTickOutline className="text-white hover:text-sky-200" /> : null}
-						</>
+					children={renderNavLink(
+						<MdOutlineBookmarkAdd className="text-white hover:text-sky-200" />,
+						'Add Workout',
 					)}
 				/>
 			</div>
