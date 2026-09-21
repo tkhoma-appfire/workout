@@ -1,6 +1,4 @@
-import { useState } from 'react'
-
-export default function CheckboxSlider({checked, checkHandler}) {
+export default function CheckboxSlider({checked, checkHandler}: {checked: boolean, checkHandler: (checked: boolean) => void}) {
 	return (
 		<label className="relative inline-block w-12 h-6 cursor-pointer">
 			<input

@@ -28,6 +28,7 @@ const orangeShades = [
 ];
 
 function colorShade(num: number | undefined, min: number, max: number) {
+    console.log(orangeShades[0]);
     let colors = greenShades
     if (num === undefined || num == null) return colors[0]
     if (num <= min) return colors[0]
