@@ -17,6 +17,16 @@ export default defineConfig({
 	server: {
 		allowedHosts: [
 			'nondispersive-morton-catalectic.ngrok-free.dev'
-		]
-	}
+		],
+		proxy: {
+			'/api': {
+				target: 'http://localhost:8081',
+				changeOrigin: true,
+			},
+			'/health': {
+				target: 'http://localhost:8081',
+				changeOrigin: true,
+			},
+		},
+	},
 })

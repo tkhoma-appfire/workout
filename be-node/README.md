@@ -1,6 +1,9 @@
 # workout-be-node
 
 Node.js/Express backend for the workout app. Uses PostgreSQL with Flyway-compatible SQL migrations.
+
+For production, deploy from the **repository root** together with `fe/` as a single Vercel project. See [`../DEPLOYMENT.md`](../DEPLOYMENT.md).
+
 ---
 
 ## API

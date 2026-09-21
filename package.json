@@ -1,0 +1,13 @@
+{
+  "name": "workout",
+  "private": true,
+  "workspaces": [
+    "fe",
+    "be-node"
+  ],
+  "scripts": {
+    "build": "npm run build -w workout-be-node && npm run build -w fe_refactor",
+    "dev:fe": "npm run dev -w fe_refactor",
+    "dev:be": "npm run dev -w workout-be-node"
+  }
+}

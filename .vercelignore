@@ -1,0 +1,6 @@
+fe_mobile/
+postgres-data/
+.agents/
+docs/
+bin/
+build/
