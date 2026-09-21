@@ -2,8 +2,6 @@ import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import type { PoolConfig } from "pg";
 
-const projectRoot = join(fileURLToPath(new URL(".", import.meta.url)), "../..");
-
 export function getDatabaseConfig(): PoolConfig {
   if (process.env.DB_HOST) {
     return {
@@ -30,6 +28,9 @@ export function getDatabaseConfig(): PoolConfig {
 }
 
 export function getMigrationsDir(): string {
-  return process.env.MIGRATIONS_DIR
-    ?? join(projectRoot, "src/db/migration");
+  if (process.env.MIGRATIONS_DIR) {
+    return process.env.MIGRATIONS_DIR;
+  }
+
+  return join(fileURLToPath(new URL(".", import.meta.url)), "migration");
 }

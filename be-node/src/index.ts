@@ -1,22 +1,15 @@
+// Vercel requires the entrypoint to import express directly.
+import express from "express";
 import "./env.js";
-import { Pool } from "pg";
-import { createApp } from "./app.js";
-import { getDatabaseConfig } from "./db/config.js";
-import { runMigrations } from "./db/migrate.js";
+import { getApp } from "./bootstrap.js";
 
 const port = Number(process.env.PORT ?? 8081);
+const app = await getApp();
 
-async function main() {
-  const pool = new Pool(getDatabaseConfig());
-  await runMigrations(pool);
+export default app;
 
-  const app = createApp(pool);
+if (!process.env.VERCEL) {
   app.listen(port, () => {
     console.log(`workout-be-node listening on http://localhost:${port}`);
   });
 }
-
-main().catch((error) => {
-  console.error(error);
-  process.exit(1);
-});
