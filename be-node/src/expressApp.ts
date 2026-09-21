@@ -9,14 +9,14 @@ function getAllowedOrigins(): string[] {
     return configured.split(",").map((origin) => origin.trim()).filter(Boolean);
   }
 
-  return ["http://localhost:5173"];
+  return ["http://localhost:5173", "https://workout-ne921qvqb-secondffgfs-projects.vercel.app", "https://workout-fe-git-master-secondffgfs-projects.vercel.app"];
 }
 
 export function createApp(pool: Pool) {
   const app = express();
 
   app.use(cors({
-    origin(origin, callback) {
+    origin(origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) {
       if (!origin || getAllowedOrigins().includes(origin)) {
         callback(null, true);
         return;
