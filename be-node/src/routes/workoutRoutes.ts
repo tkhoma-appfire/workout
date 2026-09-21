@@ -1,9 +1,11 @@
 import { Router } from "express";
 import type { Pool } from "pg";
+import { upload } from "../middleware/upload.js";
 import { getCalendarEvents } from "../services/calendarService.js";
 import { getCurrentPeriodWorkouts } from "../services/currentPeriodService.js";
 import { upsertFlagged } from "../services/flaggedService.js";
 import { getFirstWorkoutDate } from "../services/firstWorkoutService.js";
+import { importCsv } from "../services/importService.js";
 import { getWorkoutsPerPeriod } from "../services/workoutResponseBuilder.js";
 import type { DateRange, WorkoutsPeriod } from "../types/workout.js";
 
@@ -49,6 +51,21 @@ export function createWorkoutRoutes(pool: Pool): Router {
       res.json(events);
     } catch (error) {
       const message = error instanceof Error ? error.message : "Failed to load calendar events";
+      res.status(400).json({ error: message });
+    }
+  });
+
+  router.post("/import/csv", upload.single("file"), async (req, res) => {
+    try {
+      if (!req.file) {
+        res.status(400).json({ error: "File is required" });
+        return;
+      }
+
+      const message = await importCsv(pool, req.file.buffer);
+      res.send(message);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Failed to import workouts";
       res.status(400).json({ error: message });
     }
   });

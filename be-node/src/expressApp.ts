@@ -32,6 +32,11 @@ export function createApp(pool: Pool) {
       return;
     }
 
+    if (req.path === "/api/import/csv") {
+      next();
+      return;
+    }
+
     express.json()(req, res, next);
   });
   app.use("/api", createWorkoutRoutes(pool));

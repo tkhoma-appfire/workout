@@ -226,6 +226,29 @@ curl http://localhost:8081/api/first_workout_date
 
 ---
 
+### `POST /api/import/csv`
+
+Imports workouts from a ZIP file containing `workouts.csv` (same format as export).
+
+**Request:** `multipart/form-data` with field `file` (`.zip`)
+
+**Response `200`** (plain text)
+
+```
+Imported 42 workouts from ZIP
+```
+
+Skips workouts whose date already exists in the database.
+
+**Example**
+
+```bash
+curl -X POST http://localhost:8081/api/import/csv \
+  -F "file=@workouts.zip"
+```
+
+---
+
 ### `POST /api/add_flagged`
 
 Toggles a flagged calendar day, or returns all flagged days when no date is sent.
