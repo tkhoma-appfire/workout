@@ -123,6 +123,60 @@ curl -X POST http://localhost:8081/api/workouts \
 
 ---
 
+### `POST /api/add_workout`
+
+Creates a new workout.
+
+**Request body:** `SingleWorkoutModel` fields (`date`, `time`, `calories`, `puls`, `maxPuls`, `intensive`, `aero`, `anaero`, `trainingLoad`, `rounds`, `comment`, `exercises`).
+
+**Response `202`** — empty body on success.
+
+**Response `400`** — workout already exists for that date (plain text).
+
+---
+
+### `POST /api/edit_workout`
+
+Updates an existing workout. Requires `id` in the request body.
+
+**Response `202`** — empty body on success.
+
+**Response `400`** — duplicate date conflict (plain text).
+
+**Response `404`**
+
+```json
+{ "error": "Can't find workout" }
+```
+
+---
+
+### `GET /api/template_workout`
+
+Returns a workout for the given date, used as a template when adding a new workout.
+
+**Query parameters**
+
+| Param | Type | Required | Description |
+|-------|------|----------|-------------|
+| `date` | `string` | Yes | Workout date (`yyyy-MM-dd`) |
+
+**Response `200`:** `SingleWorkoutModel`
+
+**Response `404`**
+
+```json
+{ "error": "Can't find workout" }
+```
+
+**Example**
+
+```bash
+curl "http://localhost:8081/api/template_workout?date=2025-09-15"
+```
+
+---
+
 ### `POST /api/calendar_events`
 
 Returns workout summary events for a date range (used by the calendar view).
@@ -352,6 +406,22 @@ Returns all favorite workouts as `SingleWorkoutModel[]`, ordered by most recentl
     "exercises": []
   }
 ]
+```
+
+---
+
+### `GET /api/flagged`
+
+Returns workouts for flagged days. A flagged day maps to the workout on the following calendar day (same rule as the Java backend).
+
+**Response `200`**
+
+Array of `SingleWorkoutModel`, sorted by date descending.
+
+**Example**
+
+```bash
+curl http://localhost:8081/api/flagged
 ```
 
 ---

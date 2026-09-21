@@ -1,9 +1,12 @@
 import type { Pool } from "pg";
+import { toSingleWorkoutModels } from "../mappers/singleWorkoutMapper.js";
 import {
   deleteFlaggedDay,
   findAllFlaggedDays,
+  findFlaggedWorkouts,
   insertFlaggedDay,
 } from "../repositories/flaggedRepository.js";
+import type { SingleWorkoutModel } from "../types/workout.js";
 
 export async function upsertFlagged(
   pool: Pool,
@@ -25,4 +28,9 @@ export async function upsertFlagged(
   result.push(date);
   result.sort();
   return result;
+}
+
+export async function getFlaggedWorkouts(pool: Pool): Promise<SingleWorkoutModel[]> {
+  const rows = await findFlaggedWorkouts(pool);
+  return toSingleWorkoutModels(rows);
 }

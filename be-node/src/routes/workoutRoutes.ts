@@ -4,14 +4,17 @@ import { upload } from "../middleware/upload.js";
 import { getExercises } from "../services/exerciseService.js";
 import { getCalendarEvents } from "../services/calendarService.js";
 import { getCurrentPeriodWorkouts } from "../services/currentPeriodService.js";
-import { upsertFlagged } from "../services/flaggedService.js";
+import { getFlaggedWorkouts, upsertFlagged } from "../services/flaggedService.js";
 import { getFavoriteWorkouts, toggleFavorite } from "../services/favoriteService.js";
 import { getFirstWorkoutDate } from "../services/firstWorkoutService.js";
 import { exportCsv } from "../services/exportService.js";
 import { importCsv } from "../services/importService.js";
 import { searchWorkouts } from "../services/searchService.js";
 import { getWorkoutsPerPeriod } from "../services/workoutResponseBuilder.js";
+import { addWorkout, editWorkout, getWorkoutTemplate } from "../services/workoutWriteService.js";
+import { WorkoutExistsError, WorkoutNotFoundError } from "../errors/workoutErrors.js";
 import type { DateRange, WorkoutsPeriod } from "../types/workout.js";
+import type { WorkoutWritePayload } from "../types/workoutWrite.js";
 
 export function createWorkoutRoutes(pool: Pool): Router {
   const router = Router();
@@ -44,6 +47,16 @@ export function createWorkoutRoutes(pool: Pool): Router {
     } catch (error) {
       const message = error instanceof Error ? error.message : "Failed to load first workout date";
       res.status(404).json({ error: message });
+    }
+  });
+
+  router.get("/flagged", async (_req, res) => {
+    try {
+      const workouts = await getFlaggedWorkouts(pool);
+      res.json(workouts);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Failed to load flagged workouts";
+      res.status(500).json({ error: message });
     }
   });
 
@@ -140,6 +153,62 @@ export function createWorkoutRoutes(pool: Pool): Router {
     } catch (error) {
       const message = error instanceof Error ? error.message : "Failed to search workouts";
       res.status(500).json({ error: message });
+    }
+  });
+
+  router.post("/add_workout", async (req, res) => {
+    try {
+      await addWorkout(pool, req.body as WorkoutWritePayload);
+      res.status(202).send();
+    } catch (error) {
+      if (error instanceof WorkoutExistsError) {
+        res.status(400).send(error.message);
+        return;
+      }
+
+      const message = error instanceof Error ? error.message : "Failed to add workout";
+      res.status(400).json({ error: message });
+    }
+  });
+
+  router.post("/edit_workout", async (req, res) => {
+    try {
+      await editWorkout(pool, req.body as WorkoutWritePayload);
+      res.status(202).send();
+    } catch (error) {
+      if (error instanceof WorkoutExistsError) {
+        res.status(400).send(error.message);
+        return;
+      }
+
+      if (error instanceof WorkoutNotFoundError) {
+        res.status(404).json({ error: error.message });
+        return;
+      }
+
+      const message = error instanceof Error ? error.message : "Failed to edit workout";
+      res.status(400).json({ error: message });
+    }
+  });
+
+  router.get("/template_workout", async (req, res) => {
+    try {
+      const date = typeof req.query.date === "string" ? req.query.date : "";
+      if (!date) {
+        res.status(400).json({ error: "date is required" });
+        return;
+      }
+
+      const workout = await getWorkoutTemplate(pool, date);
+      res.json(workout);
+    } catch (error) {
+      if (error instanceof WorkoutNotFoundError) {
+        res.status(404).json({ error: error.message });
+        return;
+      }
+
+      const message = error instanceof Error ? error.message : "Failed to load workout template";
+      res.status(400).json({ error: message });
     }
   });
 
