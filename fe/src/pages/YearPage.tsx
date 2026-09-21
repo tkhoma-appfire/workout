@@ -9,6 +9,7 @@ import type { CompareSeries } from "@/components/general/UI/chart/WorkoutBarChar
 import CustomizedYearComparisonTooltip from "@/components/general/UI/chart/CustomizedYearComparisonTooltip";
 import { formatYearlyChartData, formatGroupedNumber, mergeYearlyChartData } from "@/utils/utils";
 import { MdClear } from "react-icons/md";
+import { apiUrl } from "@/utils/http";
 
 const ticks = [0, 90, 180, 270, 360, 450, 540, 630, 720];
 const caloriesTicks = [0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000];
@@ -248,7 +249,7 @@ const parseCompareYear = (compareParam: string | null, year: number): number | n
 }
 
 async function fetchYear(startOfPeriod: number): Promise<YearlyWorkoutData> {
-  const response = await fetch("/api/workouts", {
+  const response = await fetch(apiUrl("/api/workouts"), {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

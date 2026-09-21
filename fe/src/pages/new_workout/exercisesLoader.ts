@@ -1,11 +1,12 @@
 import type { LoaderFunctionArgs } from "react-router-dom";
 import type { ExerciseNameOption } from "@/types";
+import { apiUrl } from "@/utils/http";
 
 export async function exercisesLoader(
   args: LoaderFunctionArgs,
 ): Promise<ExerciseNameOption[]> {
   void args;
-  const response = await fetch("/api/exercises", {
+  const response = await fetch(apiUrl("/api/exercises"), {
     method: "GET",
     headers: {
       "Content-Type": "application/json",

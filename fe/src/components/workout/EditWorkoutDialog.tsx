@@ -6,7 +6,7 @@ import StepWorkoutMetrics from "@/pages/new_workout/StepWorkoutMetrics";
 import type { ExerciseNameOption, NewWorkoutFormData, WorkoutType } from "@/types";
 import { CalendarContext } from "@/context/CalendarContextProvider";
 import { CurrentPeriodContext } from "@/context/CurrentPeriodContextProvider";
-import { editWorkout } from "@/utils/http";
+import { apiUrl, editWorkout } from "@/utils/http";
 import {
   validateWorkoutStep,
   validationWarningForStep,
@@ -48,7 +48,7 @@ const EditWorkoutDialog = ({ open, workout, onClose, onSaved }: EditWorkoutDialo
     let cancelled = false;
 
     const loadExerciseOptions = async () => {
-      const response = await fetch("/api/exercises", {
+      const response = await fetch(apiUrl("/api/exercises"), {
         method: "GET",
         headers: {
           "Content-Type": "application/json",

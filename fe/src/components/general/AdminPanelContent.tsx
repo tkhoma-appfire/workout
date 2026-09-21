@@ -1,10 +1,11 @@
 import axios from "axios";
+import { apiUrl } from "@/utils/http";
 import Button from "./UI/Button";
 import { useRef } from "react";
 import { message } from "antd";
 
 const exportWorkouts = async () => {
-    const response = await axios.get('/api/export/csv', {
+    const response = await axios.get(apiUrl("/api/export/csv"), {
         responseType: 'blob'
     })
 
@@ -30,7 +31,7 @@ const AdminPanelContent = () => {
         if (selected) {
             const formData = new FormData();
             formData.append("file", selected);
-            await axios.post("/api/import/csv", formData);
+            await axios.post(apiUrl("/api/import/csv"), formData);
             message.success("Imported workouts successfully");
         }
     }

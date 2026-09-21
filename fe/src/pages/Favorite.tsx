@@ -2,6 +2,7 @@ import WorkoutPieChart from "@/components/general/UI/chart/WorkoutPieChart";
 import WorkoutDetail from "@/components/general/WorkoutDetail";
 import { useState } from "react";
 import { useLoaderData, useRevalidator, type LoaderFunctionArgs } from "react-router-dom";
+import { apiUrl } from "@/utils/http";
 
 const Favorite = () => {
   const favorites = useLoaderData() as any[];
@@ -45,7 +46,7 @@ export default Favorite;
 export async function loader(
   _args: LoaderFunctionArgs,
 ): Promise<any[]> {
-  const response = await fetch("/api/favorites", {
+  const response = await fetch(apiUrl("/api/favorites"), {
     method: "GET",
     headers: {
       "Content-Type": "application/json",

@@ -3,7 +3,7 @@ import {
   parseWeekAnchor,
 } from "@/utils/weekPeriodFormat";
 import { buildWeekSelectOptions, resolveSelectedWeekValue } from "@/utils/weekSelectorOptions";
-import { fetchFirstWorkoutDate } from "@/utils/http";
+import { apiUrl, fetchFirstWorkoutDate } from "@/utils/http";
 import { useLoaderData, useSearchParams } from "react-router-dom";
 import type { WeekPageLoaderData } from "@/types";
 import { formatMonthlyChartData, formatGroupedNumber } from "@/utils/utils";
@@ -73,7 +73,7 @@ export async function loader(params: { request: Request }) {
 
   const [{ firstDate: firstWorkoutDate }, response] = await Promise.all([
     fetchFirstWorkoutDate(),
-    fetch("/api/workouts", {
+    fetch(apiUrl("/api/workouts"), {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

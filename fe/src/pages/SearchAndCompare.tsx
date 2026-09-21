@@ -6,6 +6,7 @@ import WorkoutDetail from "@/components/general/WorkoutDetail";
 import WorkoutPieChart from "@/components/general/UI/chart/WorkoutPieChart";
 import { BsFlagFill } from "react-icons/bs";
 import { MdSearch } from "react-icons/md";
+import { apiUrl } from "@/utils/http";
 
 const SearchAndCompare = () => {
   const exerciseOptions = useLoaderData() as ExerciseNameOption[];
@@ -24,13 +25,13 @@ const SearchAndCompare = () => {
       params.set("onlySelected", "true");
     }
     const query = params.toString();
-    const response = await fetch(`/api/search${query ? `?${query}` : ""}`);
+    const response = await fetch(apiUrl(`/api/search${query ? `?${query}` : ""}`));
     const data = await response.json();
     setWorkouts(data);
   };
 
   const showFlagged = async () => {
-    const response = await fetch(`/api/flagged`);
+    const response = await fetch(apiUrl("/api/flagged"));
     const data = await response.json();
     setWorkouts(data);
   };
