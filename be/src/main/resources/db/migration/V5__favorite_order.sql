@@ -1,1 +1,0 @@
-ALTER TABLE favorite ADD COLUMN fav_order INT;

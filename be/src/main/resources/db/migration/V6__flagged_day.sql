@@ -1,4 +1,0 @@
-CREATE TABLE flagged (
-	id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-	day VARCHAR(10) NOT NULL UNIQUE
-);

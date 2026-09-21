@@ -1,1 +1,0 @@
-ALTER TABLE exercise ADD COLUMN ex_order INT;
