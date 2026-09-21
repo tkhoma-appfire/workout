@@ -1,6 +1,6 @@
 # Vercel deployment (frontend + API)
 
-This repo deploys as **one Vercel project**: static React app from `fe/` and Express API from `be-node/` via `api/index.ts`.
+This repo deploys as **one Vercel project**: static React app from `fe/` and Express API from `be-node/` via `api/index.js`.
 
 ## Vercel project settings
 

@@ -5,9 +5,18 @@
     "fe",
     "be-node"
   ],
+  "allowScripts": {
+    "esbuild@0.28.2": true
+  },
+  "overrides": {
+    "esbuild": "0.28.2"
+  },
   "scripts": {
     "build": "npm run build -w workout-be-node && npm run build -w fe_refactor",
     "dev:fe": "npm run dev -w fe_refactor",
     "dev:be": "npm run dev -w workout-be-node"
+  },
+  "devDependencies": {
+    "typescript": "~5.9.3"
   }
 }

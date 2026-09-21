@@ -9,3 +9,4 @@ build/
 postgres-data/
 .agents/
 skills-lock.json
+node_modules/

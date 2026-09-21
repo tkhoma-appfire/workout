@@ -18,7 +18,7 @@
     }
   ],
   "functions": {
-    "api/index.ts": {
+    "api/index.js": {
       "includeFiles": "be-node/dist/db/migration/**",
       "maxDuration": 30
     }
