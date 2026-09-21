@@ -4,6 +4,7 @@ import { upload } from "../middleware/upload.js";
 import { getCalendarEvents } from "../services/calendarService.js";
 import { getCurrentPeriodWorkouts } from "../services/currentPeriodService.js";
 import { upsertFlagged } from "../services/flaggedService.js";
+import { getFavoriteWorkouts, toggleFavorite } from "../services/favoriteService.js";
 import { getFirstWorkoutDate } from "../services/firstWorkoutService.js";
 import { importCsv } from "../services/importService.js";
 import { getWorkoutsPerPeriod } from "../services/workoutResponseBuilder.js";
@@ -67,6 +68,32 @@ export function createWorkoutRoutes(pool: Pool): Router {
     } catch (error) {
       const message = error instanceof Error ? error.message : "Failed to import workouts";
       res.status(400).json({ error: message });
+    }
+  });
+
+  router.post("/favorites", async (req, res) => {
+    try {
+      const workoutId = (req.body as { workout?: string })?.workout;
+      if (!workoutId) {
+        res.status(400).json({ error: "workout is required" });
+        return;
+      }
+
+      await toggleFavorite(pool, workoutId);
+      res.status(202).send();
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Failed to update favorite";
+      res.status(400).json({ error: message });
+    }
+  });
+
+  router.get("/favorites", async (_req, res) => {
+    try {
+      const favorites = await getFavoriteWorkouts(pool);
+      res.json(favorites);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Failed to load favorites";
+      res.status(500).json({ error: message });
     }
   });
 

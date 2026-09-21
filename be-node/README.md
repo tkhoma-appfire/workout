@@ -249,6 +249,39 @@ curl -X POST http://localhost:8081/api/import/csv \
 
 ---
 
+### `POST /api/favorites`
+
+Toggles a workout as favorite (add if missing, remove if already favorited).
+
+**Request body**
+
+```json
+{ "workout": "uuid" }
+```
+
+**Response `202`** — empty body
+
+---
+
+### `GET /api/favorites`
+
+Returns all favorite workouts as `SingleWorkoutModel[]`, ordered by most recently favorited first.
+
+**Response `200`**
+
+```json
+[
+  {
+    "id": "uuid",
+    "date": "2025-09-15",
+    "favorite": true,
+    "exercises": []
+  }
+]
+```
+
+---
+
 ### `POST /api/add_flagged`
 
 Toggles a flagged calendar day, or returns all flagged days when no date is sent.
