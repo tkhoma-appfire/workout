@@ -210,18 +210,12 @@ curl http://localhost:8081/api/current_period
 
 ### `GET /api/first_workout_date`
 
-Returns the date of the earliest workout in the database.
+Returns the date of the earliest workout in the database. If there are no workouts, returns `2000-01-01`.
 
 **Response `200`**
 
 ```json
 { "firstDate": "2020-01-15" }
-```
-
-**Response `404`** (no workouts)
-
-```json
-{ "error": "No workouts found" }
 ```
 
 **Example**
