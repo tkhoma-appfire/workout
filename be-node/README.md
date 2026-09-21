@@ -249,6 +249,33 @@ curl -X POST http://localhost:8081/api/import/csv \
 
 ---
 
+### `GET /api/exercises`
+
+Returns exercise name options for dropdowns.
+
+**Query parameters**
+
+| Param | Type | Default | Description |
+|-------|------|---------|-------------|
+| `id_value` | `boolean` | `false` | When `true`, `value` is the exercise UUID; otherwise `value` is the exercise name |
+
+**Response `200`**
+
+```json
+[
+  { "value": "swing", "label": "swing" }
+]
+```
+
+**Example**
+
+```bash
+curl "http://localhost:8081/api/exercises"
+curl "http://localhost:8081/api/exercises?id_value=true"
+```
+
+---
+
 ### `POST /api/favorites`
 
 Toggles a workout as favorite (add if missing, remove if already favorited).

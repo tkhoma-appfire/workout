@@ -1,4 +1,17 @@
-import type { PoolClient } from "pg";
+import type { Pool, PoolClient } from "pg";
+
+type ExerciseNameRow = {
+  id: string;
+  value: string;
+};
+
+export async function findAllExerciseNames(pool: Pool): Promise<ExerciseNameRow[]> {
+  const result = await pool.query<ExerciseNameRow>(
+    "SELECT id, value FROM exercise_name",
+  );
+
+  return result.rows;
+}
 
 export async function upsertExerciseNameId(
   client: PoolClient,

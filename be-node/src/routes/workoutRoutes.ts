@@ -1,6 +1,7 @@
 import { Router } from "express";
 import type { Pool } from "pg";
 import { upload } from "../middleware/upload.js";
+import { getExercises } from "../services/exerciseService.js";
 import { getCalendarEvents } from "../services/calendarService.js";
 import { getCurrentPeriodWorkouts } from "../services/currentPeriodService.js";
 import { upsertFlagged } from "../services/flaggedService.js";
@@ -12,6 +13,17 @@ import type { DateRange, WorkoutsPeriod } from "../types/workout.js";
 
 export function createWorkoutRoutes(pool: Pool): Router {
   const router = Router();
+
+  router.get("/exercises", async (req, res) => {
+    try {
+      const idValue = req.query.id_value === "true";
+      const exercises = await getExercises(pool, idValue);
+      res.json(exercises);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Failed to load exercises";
+      res.status(500).json({ error: message });
+    }
+  });
 
   router.get("/current_period", async (_req, res) => {
     try {
