@@ -1,8 +1,11 @@
-import type { NewWorkoutFormData } from "@/types"
+import { BASE_URL_DEVELOPMENT } from "@/constants";
+import type { NewWorkoutFormData } from "@/types";
+
+export const apiUrl = (path: string) => `${BASE_URL_DEVELOPMENT}${path}`;
 
 export const fetchCalendarEvents = async (startDate: string, endDate: string) => {
  	const response = await fetch(
- 		'/api/calendar_events',
+ 		apiUrl('/api/calendar_events'),
 		{
 			method: 'POST',
 			headers: {
@@ -19,7 +22,7 @@ export const fetchCalendarEvents = async (startDate: string, endDate: string) =>
 
 export async function fetchFirstWorkoutDate() {
 	const response = await fetch(
-		'/api/first_workout_date',
+		apiUrl('/api/first_workout_date'),
 		{
 			method: 'GET',
 			headers: {
@@ -37,7 +40,7 @@ export async function fetchFirstWorkoutDate() {
 
 export async function fetchCurrentPeriod() {
 	const response = await fetch(
-		'/api/current_period',
+		apiUrl('/api/current_period'),
 	)
 
 	if (!response.ok) {
@@ -49,7 +52,7 @@ export async function fetchCurrentPeriod() {
 
 export async function fetchWorkoutTemplate(date: string) {
 	const response = await fetch(
-		`/api/template_workout?date=${date}`,
+		apiUrl(`/api/template_workout?date=${date}`),
 		{
 			method: 'GET',
 		}
@@ -64,7 +67,7 @@ export async function fetchWorkoutTemplate(date: string) {
 
 export async function addWorkout(workout: NewWorkoutFormData) {
 	const response = await fetch(
-		'/api/add_workout',
+		apiUrl('/api/add_workout'),
 		{
 			method: 'POST',
 			headers: {
@@ -80,7 +83,7 @@ export async function addWorkout(workout: NewWorkoutFormData) {
 
 export async function editWorkout(workout: NewWorkoutFormData & { id: string }) {
 	const response = await fetch(
-		'/api/edit_workout',
+		apiUrl('/api/edit_workout'),
 		{
 			method: 'POST',
 			headers: {

@@ -7,6 +7,7 @@ import { formatMonthlyChartData, formatGroupedNumber } from "@/utils/utils";
 import type { WorkoutData, WorkoutType } from "@/types";
 import WorkoutDetail from "@/components/general/WorkoutDetail";
 import EditWorkoutDialog from "@/components/workout/EditWorkoutDialog";
+import { apiUrl } from "@/utils/http";
 import { resolveWorkoutSelection } from "@/utils/workoutForm";
 
 const formatMonthValue = (date: Date) =>
@@ -104,7 +105,7 @@ const MonthPage = () => {
 export async function loader(params: { request: Request }) {
   const url = new URL(params.request.url);
   const startOfPeriod = normalizeStartOfPeriod(url.searchParams.get("start"));
-  const response = await fetch("/api/workouts", {
+  const response = await fetch(apiUrl("/api/workouts"), {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
