@@ -1,6 +1,6 @@
 import { App } from "antd";
 import { useContext, useState } from "react";
-import { useLoaderData, useNavigate } from "react-router-dom";
+import { useLoaderData, useNavigate, useRevalidator } from "react-router-dom";
 import StepWorkoutMetrics from "./StepWorkoutMetrics";
 import StepExercises from "./StepExercises";
 import StepBasicInfo from "./StepBasicInfo";
@@ -38,6 +38,7 @@ const NewWorkoutPage = () => {
   }));
 
   const navigate = useNavigate();
+  const revalidator = useRevalidator();
 
   const updateField = <K extends keyof NewWorkoutFormData>(
     key: K,
@@ -91,22 +92,33 @@ const NewWorkoutPage = () => {
 
   const goBack = () => setCurrentStep((prev) => Math.max(prev - 1, 0));
 
-  const handleSubmit = async () => {
+  const handleSubmit = () => {
     if (!validateStep()) {
       message.warning(validationWarningForStep(currentStep));
       return;
     }
-    console.log("New workout payload", formData);
-    try {
-      formData.exercises = formData.exercises.map((e, index) => ({ ...e, order: index + 1 }));
-      await addWorkout(formData);
-      await refreshCalendarEvents();
-      await fetchCurrentPeriodWorkouts();
-      message.success("Workout submitted");
-      navigate("/month");
-    } catch (error) {
-      message.error("Failed to add workout!");
-    }
+
+    const payload = {
+      ...formData,
+      exercises: formData.exercises.map((exercise, index) => ({
+        ...exercise,
+        order: index + 1,
+      })),
+    };
+
+    message.success("Workout submitted");
+    navigate("/month");
+
+    void (async () => {
+      try {
+        await addWorkout(payload);
+        await refreshCalendarEvents();
+        await fetchCurrentPeriodWorkouts();
+        revalidator.revalidate();
+      } catch {
+        message.error("Failed to add workout!");
+      }
+    })();
   };
 
   const changeTemplateDateHandler = async (e: React.ChangeEvent<HTMLInputElement>) => {
