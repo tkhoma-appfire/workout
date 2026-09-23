@@ -49,19 +49,26 @@ export const CurrentPeriodContext = createContext<{
 export function CurrentPeriodContextProvider({children}: PropsWithChildren<{}>) {
 	const [state, dispatch] = useReducer(reducer, initialState)
 
-	const fetchCurrentPeriodWorkouts = useCallback(() => {
+	const fetchCurrentPeriodWorkouts = useCallback(async () => {
 		dispatch({
 			type: 'FETCH_CURRENT_WEEK_START'
-		})
-		fetchCurrentPeriod()
-		  .catch((error: { message: string }) => dispatch({
-				 type: 'FETCH_CURRENT_WEEK_FAILURE',
-				 payload: error.message || 'Failed to fetch current week!'
-			}))
-			.then((result: any) => dispatch({
+		});
+
+		try {
+			const result = await fetchCurrentPeriod();
+			dispatch({
 				type: 'FETCH_CURRENT_WEEK_SUCCESS',
-				...result
-			}))
+				...result,
+			});
+		} catch (error) {
+			const message = error instanceof Error
+				? error.message
+				: 'Failed to fetch current week!';
+			dispatch({
+				type: 'FETCH_CURRENT_WEEK_FAILURE',
+				payload: message,
+			});
+		}
 	}, [])
 
 	useEffect(() => {

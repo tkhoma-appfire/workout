@@ -25,11 +25,14 @@ function reducer(
 			return {
 				...state,
 				calendarError: null,
-				startDate: action.startDate || '',
-				endDate: action.endDate || ''
+				startDate: action.startDate || state.startDate,
+				endDate: action.endDate || state.endDate,
 			};
 		case 'FETCH_SUCCESS':
-			return { ...state, events: action.payload };
+			return {
+				...state,
+				events: Array.isArray(action.payload) ? action.payload : [],
+			};
 		case 'FETCH_FAILURE':
 			return { ...state, calendarError: action.payload };
 		default:
@@ -51,8 +54,17 @@ export function CalendarContextProvider({children}: PropsWithChildren<{}>) {
 	const [state, dispatch] = useReducer(reducer, initialState)
 
 	const fetchEvents = useCallback(async (startDate: string, endDate: string) => {
-		const inputDate = new Date(startDate);
+		if (!startDate || !endDate) {
+			return;
+		}
+
+		const inputDate = new Date(`${startDate}T12:00:00`);
+		if (Number.isNaN(inputDate.getTime())) {
+			return;
+		}
+
 		const today = new Date();
+		today.setHours(23, 59, 59, 999);
 
 		if (state.startDate === startDate && state.endDate === endDate ||
 				inputDate > today ) {
@@ -60,30 +72,35 @@ export function CalendarContextProvider({children}: PropsWithChildren<{}>) {
 		}
 		dispatch({ type: 'FETCH_START', startDate, endDate })
 
-		fetchCalendarEvents(startDate, endDate)
-		.catch((error: { message: any; }) => dispatch({
-			type: 'FETCH_FAILURE',
-			payload: (error.message || 'Failed to fetch calendar events!')
-		}))
-		.then((result: any) => dispatch({
-			type: 'FETCH_SUCCESS',
-			payload: result
-		}))
-	}, []);
+		try {
+			const result = await fetchCalendarEvents(startDate, endDate);
+			dispatch({ type: 'FETCH_SUCCESS', payload: result });
+		} catch (error) {
+			const message = error instanceof Error
+				? error.message
+				: 'Failed to fetch calendar events!';
+			dispatch({ type: 'FETCH_FAILURE', payload: message });
+		}
+	}, [state.startDate, state.endDate]);
 
 	const refreshEvents = useCallback(async () => {
-		dispatch({ type: 'FETCH_START', startDate: state.startDate, endDate: state.endDate });
+		const { startDate, endDate } = state;
+		if (!startDate || !endDate) {
+			return;
+		}
 
-		fetchCalendarEvents(state.startDate, state.endDate)
-		.catch((error: { message: any; }) => dispatch({
-			type: 'FETCH_FAILURE',
-			payload: (error.message || 'Failed to fetch calendar events!')
-		}))
-		.then((result: any) => dispatch({
-			type: 'FETCH_SUCCESS',
-			payload: result
-		}))
-	}, []);
+		dispatch({ type: 'FETCH_START', startDate, endDate });
+
+		try {
+			const result = await fetchCalendarEvents(startDate, endDate);
+			dispatch({ type: 'FETCH_SUCCESS', payload: result });
+		} catch (error) {
+			const message = error instanceof Error
+				? error.message
+				: 'Failed to fetch calendar events!';
+			dispatch({ type: 'FETCH_FAILURE', payload: message });
+		}
+	}, [state.startDate, state.endDate]);
 
 	return (
 		<CalendarContext value={{state, fetchEvents, refreshEvents}}>

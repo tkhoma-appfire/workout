@@ -7,13 +7,18 @@ import {
 } from "react-icons/fa";
 import { CiStar } from "react-icons/ci";
 import useHttp from '@/hooks/useHttp';
+import { isIsoDateString } from '@/utils/date';
 
 const formatSnapshotDateLabel = (snapshot: { date?: string; xaxisLabel?: string }) => {
 	if (!snapshot.date) {
 		return snapshot.xaxisLabel ?? '';
 	}
 
-	const workoutYear = new Date(snapshot.date).getFullYear();
+	if (!isIsoDateString(snapshot.date)) {
+		return snapshot.xaxisLabel ?? '';
+	}
+
+	const workoutYear = new Date(`${snapshot.date}T12:00:00`).getFullYear();
 	if (workoutYear !== new Date().getFullYear()) {
 		return `${snapshot.xaxisLabel}.${workoutYear}`;
 	}
@@ -96,8 +101,6 @@ export default function WorkoutSnapshot({
 		requestConfig,
 		null
 	)
-
-	console.log(workout);
 
 	const handleSelect = (snapshot: { id: any; }, checked: boolean) => {
 		onSelect(snapshot, checked)

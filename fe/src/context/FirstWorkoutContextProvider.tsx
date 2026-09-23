@@ -43,15 +43,23 @@ export function FirstWorkoutContextProvider({children}: PropsWithChildren<{}>) {
 	useEffect(() => {
 		dispatch({ type: 'FETCH_FIRST_WORKOUT_START' })
 
-		fetchFirstWorkoutDate()
-		.catch((error: { message: any }) => dispatch({
-			type: 'FETCH_FIRST_WORKOUT_FAILURE',
-			payload: error.message
-		}))
-		.then((result: { firstDate: string }) => dispatch({
-			type: 'FETCH_FIRST_WORKOUT_SUCCESS',
-			payload: result
-		}))
+		void (async () => {
+			try {
+				const result = await fetchFirstWorkoutDate();
+				dispatch({
+					type: 'FETCH_FIRST_WORKOUT_SUCCESS',
+					payload: result,
+				});
+			} catch (error) {
+				const message = error instanceof Error
+					? error.message
+					: 'Failed to fetch first workout date';
+				dispatch({
+					type: 'FETCH_FIRST_WORKOUT_FAILURE',
+					payload: message,
+				});
+			}
+		})();
 	}, [])
 	
 	return (

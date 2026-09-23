@@ -5,7 +5,7 @@ import StepWorkoutMetrics from "./StepWorkoutMetrics";
 import StepExercises from "./StepExercises";
 import StepBasicInfo from "./StepBasicInfo";
 import type { ExerciseNameOption, NewWorkoutFormData } from "../../types";
-import { format } from 'date-fns'
+import { format, isValid } from 'date-fns'
 import { addWorkout, fetchWorkoutTemplate } from "@/utils/http";
 import { createDefaultRounds, isValidRounds } from "@/utils/rounds";
 import { CalendarContext } from "@/context/CalendarContextProvider";
@@ -123,7 +123,12 @@ const NewWorkoutPage = () => {
 
   const changeTemplateDateHandler = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const newDate = e.target.value;
-    const templateDateFormatted = format(new Date(newDate), 'yyyy-MM-dd');
+    const parsedTemplateDate = new Date(`${newDate}T12:00:00`);
+    if (!isValid(parsedTemplateDate)) {
+      message.warning("Invalid template date");
+      return;
+    }
+    const templateDateFormatted = format(parsedTemplateDate, 'yyyy-MM-dd');
     setTemplateDate(templateDateFormatted);
     try {
       const template = await fetchWorkoutTemplate(templateDateFormatted);

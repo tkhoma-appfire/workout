@@ -5,6 +5,7 @@ import FullCalendar from "@fullcalendar/react";
 import { BsFlagFill } from "react-icons/bs";
 import { FirstWorkoutContext } from "@/context/FirstWorkoutContextProvider";
 import useHttp from "@/hooks/useHttp";
+import { formatLocalDate, isIsoDateString } from "@/utils/date";
 
 type CalendarContextType = {
 	state: {
@@ -59,14 +60,19 @@ const WorkoutCalendar = () => {
     sendFlaggedDayRequest(dateStr)
   };
 
-  const calendarData = calendarState.events.map((event: { trainingLoad: any; calories: any; date: any; }) => ({
+  const calendarEvents = Array.isArray(calendarState.events) ? calendarState.events : [];
+
+  const calendarData = calendarEvents.map((event: { trainingLoad: any; calories: any; date: any; }) => ({
 		title: `${event.trainingLoad} - ${event.calories}`,
 		date: event.date,
 		description: `training load: ${event.trainingLoad}\ncalories: ${event.calories}`
 	}))
 
   function renderDayCell(arg: { date: Date; dayNumberText: string }) {
-		const dateStr = arg.date.toISOString().split('T')[0]
+		const dateStr = formatLocalDate(arg.date);
+		if (!dateStr) {
+			return <div>{arg.dayNumberText}</div>;
+		}
 		if (flaggedDays.includes(dateStr)) {
 			return (
 				<div>
@@ -110,9 +116,7 @@ const WorkoutCalendar = () => {
 				dayCellContent={renderDayCell}
 				eventColor="#0284c7"
 				eventTextColor="#ffffff"
-				validRange={{
-				start: firstWorkout
-				}}
+				validRange={isIsoDateString(firstWorkout) ? { start: firstWorkout } : undefined}
 				eventDidMount={(info) => {
 					info.el.setAttribute('title', info.event.extendedProps.description || '');
 				}}
