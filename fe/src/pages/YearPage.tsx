@@ -1,9 +1,9 @@
 import YearSelector from "@/components/dashboard/YearSelector";
 import { Button, Tabs } from "antd";
-import { useContext, useMemo, useState } from "react";
+import { Suspense, useContext, useMemo, useState } from "react";
 import { FirstWorkoutContext } from "@/context/FirstWorkoutContextProvider";
-import { useLoaderData, useSearchParams } from "react-router-dom";
-import type { YearPageLoaderData, YearlyWorkoutData } from "@/types";
+import { Await, useLoaderData, useSearchParams } from "react-router-dom";
+import type { YearlyWorkoutData } from "@/types";
 import WorkoutBarChart from "@/components/general/UI/chart/WorkoutBarChart";
 import type { CompareSeries } from "@/components/general/UI/chart/WorkoutBarChart";
 import CustomizedYearComparisonTooltip from "@/components/general/UI/chart/CustomizedYearComparisonTooltip";
@@ -29,18 +29,82 @@ function minutesToHHMM(totalMinutes: number) {
 	return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
 }
 
-const YearPage = () => {
-  const firstWorkoutState:
-  {
-    state:{
-      firstWorkout: string;
-      error: string | null
-    }
-  } | undefined = useContext(FirstWorkoutContext);
-  const firstWorkout = firstWorkoutState?.state.firstWorkout || '';
-  const [searchParams, setSearchParams] = useSearchParams();
-  const { year, compareYear, current, comparison }: YearPageLoaderData = useLoaderData();
-  const [_selectedBar, setSelectedBar] = useState<any | null>(null);
+const parseYearAnchor = (startParam: string | null): number => {
+  if (!startParam) return new Date().getFullYear();
+  const trimmed = startParam.trim();
+  const m = trimmed.match(/^\d{4}/);
+  if (m) {
+    return parseInt(m[0], 10);
+  }
+  return new Date().getFullYear();
+};
+
+const parseCompareYear = (compareParam: string | null, year: number): number | null => {
+  if (!compareParam) return null;
+  const m = compareParam.trim().match(/^\d{4}/);
+  if (!m) return null;
+  const compareYear = parseInt(m[0], 10);
+  return compareYear === year ? null : compareYear;
+};
+
+async function fetchYear(startOfPeriod: number): Promise<YearlyWorkoutData> {
+  const response = await fetch(apiUrl("/api/workouts"), {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      timePeriod: "YEAR",
+      startOfPeriod,
+    }),
+  });
+
+  if (!response.ok) throw new Response("Not Found", { status: 404 });
+
+  return response.json();
+}
+
+type YearChartsData = {
+  current: YearlyWorkoutData;
+  comparison: YearlyWorkoutData | null;
+};
+
+function loadYearChartsData(year: number, compareYear: number | null): Promise<YearChartsData> {
+  return Promise.all([
+    fetchYear(year),
+    compareYear ? fetchYear(compareYear) : Promise.resolve(null),
+  ]).then(([current, comparison]) => ({ current, comparison }));
+}
+
+function YearChartsLoading() {
+  return (
+    <div className="mt-8 w-full px-16 text-center text-slate-500">
+      Loading year data…
+    </div>
+  );
+}
+
+const StatisticsRow = ({ year, workouts }: { year: number; workouts: YearlyWorkoutData }) => (
+  <div className="flex w-full justify-evenly">
+    <div className="text-gray-500 whitespace-nowrap">{year}</div>
+    <div className="whitespace-nowrap">{workouts.statistics.exerciseTime}</div>
+    <div className="whitespace-nowrap">{formatGroupedNumber(workouts.statistics.calories)} ccal</div>
+    <div className="whitespace-nowrap">{workouts.totalElements} workouts</div>
+  </div>
+);
+
+function YearChartsBody({
+  year,
+  compareYear,
+  current,
+  comparison,
+}: {
+  year: number;
+  compareYear: number | null;
+  current: YearlyWorkoutData;
+  comparison: YearlyWorkoutData | null;
+}) {
+  const [_selectedBar, setSelectedBar] = useState<unknown | null>(null);
 
   const chartData = useMemo(() => {
     const baseData = formatYearlyChartData(current.content);
@@ -148,6 +212,42 @@ const YearPage = () => {
     [chartData, compareSeries, comparisonTooltip, year],
   );
 
+  return (
+    <>
+      {comparison
+        ? (
+          <div className="flex w-full flex-col gap-1 px-16 text-lg font-semibold">
+            <StatisticsRow year={year} workouts={current} />
+            <StatisticsRow year={compareYear as number} workouts={comparison} />
+          </div>
+        )
+        : (
+          <div className="flex justify-evenly w-full font-semibold text-lg px-16 mt-4">
+            <div className="whitespace-nowrap">{current.statistics.exerciseTime}</div>
+            <div className="whitespace-nowrap">{formatGroupedNumber(current.statistics.calories)} ccal</div>
+            <div className="whitespace-nowrap">{current.totalElements} workouts</div>
+          </div>
+        )}
+      <div className="mt-4 flex min-h-0 w-full flex-1 flex-col px-2 pb-8">
+        <Tabs
+          defaultActiveKey="volume"
+          items={chartTabs}
+          className="min-h-0 w-full flex-1"
+        />
+      </div>
+    </>
+  );
+}
+
+const YearPage = () => {
+  const firstWorkoutState = useContext(FirstWorkoutContext);
+  const firstWorkout = firstWorkoutState?.state.firstWorkout || '';
+  const [searchParams, setSearchParams] = useSearchParams();
+  const { yearData } = useLoaderData() as { yearData: Promise<YearChartsData> };
+
+  const year = parseYearAnchor(searchParams.get("start"));
+  const compareYear = parseCompareYear(searchParams.get("compare"), year);
+
   const updateParam = (name: string, value?: string) => {
     setSearchParams((prevParams: URLSearchParams) => {
       const nextParams = new URLSearchParams(prevParams);
@@ -193,87 +293,37 @@ const YearPage = () => {
           </Button>
         )}
       </div>
-      {comparison
-        ? (
-          <div className="flex w-full flex-col gap-1 px-16 text-lg font-semibold">
-            <StatisticsRow year={year} workouts={current} />
-            <StatisticsRow year={compareYear as number} workouts={comparison} />
-          </div>
-        )
-        : (
-          <div className="flex justify-evenly w-full font-semibold text-lg px-16 mt-4">
-            <div className="whitespace-nowrap">{current.statistics.exerciseTime}</div>
-            <div className="whitespace-nowrap">{formatGroupedNumber(current.statistics.calories)} ccal</div>
-            <div className="whitespace-nowrap">{current.totalElements} workouts</div>
-          </div>
-        )}
-      <div className="mt-4 flex min-h-0 w-full flex-1 flex-col px-2 pb-8">
-        <Tabs
-          defaultActiveKey="volume"
-          items={chartTabs}
-          className="min-h-0 w-full flex-1"
-        />
-      </div>
+      <Suspense fallback={<YearChartsLoading />}>
+        <Await
+          resolve={yearData}
+          errorElement={
+            <div className="mt-8 w-full px-16 text-center text-red-600">
+              Failed to load year data.
+            </div>
+          }
+        >
+          {(chartsData: YearChartsData) => (
+            <YearChartsBody
+              year={year}
+              compareYear={compareYear}
+              current={chartsData.current}
+              comparison={chartsData.comparison}
+            />
+          )}
+        </Await>
+      </Suspense>
     </div>
   );
 };
 
-const StatisticsRow = ({ year, workouts }: { year: number; workouts: YearlyWorkoutData }) => (
-  <div className="flex w-full justify-evenly">
-    <div className="text-gray-500 whitespace-nowrap">{year}</div>
-    <div className="whitespace-nowrap">{workouts.statistics.exerciseTime}</div>
-    <div className="whitespace-nowrap">{formatGroupedNumber(workouts.statistics.calories)} ccal</div>
-    <div className="whitespace-nowrap">{workouts.totalElements} workouts</div>
-  </div>
-);
-
-export default YearPage;
-
-const parseYearAnchor = (startParam: string | null): number => {
-  if (!startParam) return new Date().getFullYear();
-  const trimmed = startParam.trim();
-  // trimmed can be `yyyy`
-  const m = trimmed.match(/^\d{4}/);
-  if (m) {
-    return parseInt(m[0]);
-  }
-  return new Date().getFullYear();
-}
-
-const parseCompareYear = (compareParam: string | null, year: number): number | null => {
-  if (!compareParam) return null;
-  const m = compareParam.trim().match(/^\d{4}/);
-  if (!m) return null;
-  const compareYear = parseInt(m[0]);
-  return compareYear === year ? null : compareYear;
-}
-
-async function fetchYear(startOfPeriod: number): Promise<YearlyWorkoutData> {
-  const response = await fetch(apiUrl("/api/workouts"), {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      timePeriod: "YEAR",
-      startOfPeriod,
-    }),
-  });
-
-  if (!response.ok) throw new Response("Not Found", { status: 404 });
-
-  return response.json();
-}
-
-export async function loader(params: { request: Request }) {
+export function loader(params: { request: Request }) {
   const url = new URL(params.request.url);
   const year = parseYearAnchor(url.searchParams.get("start"));
   const compareYear = parseCompareYear(url.searchParams.get("compare"), year);
 
-  const [current, comparison] = await Promise.all([
-    fetchYear(year),
-    compareYear ? fetchYear(compareYear) : Promise.resolve(null),
-  ]);
-
-  return { year, compareYear, current, comparison };
+  return {
+    yearData: loadYearChartsData(year, compareYear),
+  };
 }
+
+export default YearPage;
