@@ -121,26 +121,38 @@ const NewWorkoutPage = () => {
     })();
   };
 
-  const changeTemplateDateHandler = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleTemplateDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setTemplateDate(e.target.value);
+  };
+
+  const handleTemplateDateBlur = async (e: React.FocusEvent<HTMLInputElement>) => {
     const newDate = e.target.value;
+    if (!newDate) {
+      return;
+    }
+
     const parsedTemplateDate = new Date(`${newDate}T12:00:00`);
     if (!isValid(parsedTemplateDate)) {
       message.warning("Invalid template date");
       return;
     }
-    const templateDateFormatted = format(parsedTemplateDate, 'yyyy-MM-dd');
+
+    const templateDateFormatted = format(parsedTemplateDate, "yyyy-MM-dd");
     setTemplateDate(templateDateFormatted);
+
     try {
       const template = await fetchWorkoutTemplate(templateDateFormatted);
-      formData.rounds = template.rounds;
-      formData.comment = template.comment;
-      formData.exercises = template.exercises.map((e: { exercise: string, weight: number }) => ({
-        exercise: e.exercise,
-        weight: e.weight,
+      setFormData((prev) => ({
+        ...prev,
+        rounds: template.rounds,
+        comment: template.comment,
+        exercises: template.exercises.map((exercise: { exercise: string; weight: number }) => ({
+          exercise: exercise.exercise,
+          weight: exercise.weight,
+        })),
       }));
-    } catch (error) {
+    } catch {
       message.warning("Template workout was not found!");
-      return;
     }
   };
 
@@ -181,7 +193,8 @@ const NewWorkoutPage = () => {
               <input
               type="date"
               value={templateDate}
-              onChange={changeTemplateDateHandler}
+              onChange={handleTemplateDateChange}
+              onBlur={handleTemplateDateBlur}
               className="rounded-md border border-slate-300 px-3 py-2 outline-none focus:border-sky-500"
               />
           </label>
