@@ -1,5 +1,6 @@
-import { createContext, useCallback, useReducer } from 'react'
+import { createContext, useCallback, useReducer, useRef } from 'react'
 import { fetchCalendarEvents } from '@/utils/http'
+import { isIsoDateString } from '@/utils/date'
 import type { PropsWithChildren } from 'react';
 
 type CalendarState = {
@@ -7,6 +8,11 @@ type CalendarState = {
 	endDate: string;
 	events: any[];
 	calendarError: string | null;
+};
+
+type VisibleRange = {
+	startDate: string;
+	endDate: string;
 };
 
 const initialState: CalendarState = {
@@ -44,19 +50,32 @@ export const CalendarContext = createContext<{
 	state: CalendarState;
 	fetchEvents: (startDate: string, endDate: string) => Promise<void>;
 	refreshEvents: () => Promise<void>;
+	syncVisibleRange: (startDate: string, endDate: string) => void;
 }>({
 	state: initialState,
 	fetchEvents: async () => {},
-	refreshEvents: async () => {}
+	refreshEvents: async () => {},
+	syncVisibleRange: () => {},
 });
 
 export function CalendarContextProvider({children}: PropsWithChildren<{}>) {
 	const [state, dispatch] = useReducer(reducer, initialState)
+	const visibleRangeRef = useRef<VisibleRange>({ startDate: '', endDate: '' });
 
-	const fetchEvents = useCallback(async (startDate: string, endDate: string) => {
-		if (!startDate || !endDate) {
+	const syncVisibleRange = useCallback((startDate: string, endDate: string) => {
+		if (!isIsoDateString(startDate) || !isIsoDateString(endDate)) {
 			return;
 		}
+
+		visibleRangeRef.current = { startDate, endDate };
+	}, []);
+
+	const fetchEvents = useCallback(async (startDate: string, endDate: string) => {
+		if (!isIsoDateString(startDate) || !isIsoDateString(endDate)) {
+			return;
+		}
+
+		syncVisibleRange(startDate, endDate);
 
 		const inputDate = new Date(`${startDate}T12:00:00`);
 		if (Number.isNaN(inputDate.getTime())) {
@@ -81,11 +100,11 @@ export function CalendarContextProvider({children}: PropsWithChildren<{}>) {
 				: 'Failed to fetch calendar events!';
 			dispatch({ type: 'FETCH_FAILURE', payload: message });
 		}
-	}, [state.startDate, state.endDate]);
+	}, [state.startDate, state.endDate, syncVisibleRange]);
 
 	const refreshEvents = useCallback(async () => {
-		const { startDate, endDate } = state;
-		if (!startDate || !endDate) {
+		const { startDate, endDate } = visibleRangeRef.current;
+		if (!isIsoDateString(startDate) || !isIsoDateString(endDate)) {
 			return;
 		}
 
@@ -100,10 +119,10 @@ export function CalendarContextProvider({children}: PropsWithChildren<{}>) {
 				: 'Failed to fetch calendar events!';
 			dispatch({ type: 'FETCH_FAILURE', payload: message });
 		}
-	}, [state.startDate, state.endDate]);
+	}, []);
 
 	return (
-		<CalendarContext value={{state, fetchEvents, refreshEvents}}>
+		<CalendarContext value={{state, fetchEvents, refreshEvents, syncVisibleRange}}>
 			{children}
 		</CalendarContext>
 	)

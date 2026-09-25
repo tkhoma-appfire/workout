@@ -1,4 +1,4 @@
-import { useContext, useEffect } from "react";
+import { useCallback, useContext, useEffect, useRef } from "react";
 import { CalendarContext } from "@/context/CalendarContextProvider";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import FullCalendar from "@fullcalendar/react";
@@ -15,6 +15,7 @@ type CalendarContextType = {
 		calendarError: string | null;
 	};
 	fetchEvents: (startDate: string, endDate: string) => Promise<void>;
+	syncVisibleRange: (startDate: string, endDate: string) => void;
 }
 
 const requestConfig = {
@@ -29,7 +30,12 @@ const WorkoutCalendar = () => {
   if (context === undefined) {
     throw new Error("WorkoutCalendar must be used within a CalendarContextProvider");
   }
-  const { state: calendarState, fetchEvents } = context;
+  const { state: calendarState, fetchEvents, syncVisibleRange } = context;
+  const fetchEventsRef = useRef(fetchEvents);
+  fetchEventsRef.current = fetchEvents;
+
+  const syncVisibleRangeRef = useRef(syncVisibleRange);
+  syncVisibleRangeRef.current = syncVisibleRange;
   const firstWorkoutState:
     { state: { firstWorkout: string; error: string | null } } | undefined = useContext(FirstWorkoutContext) 
   const firstWorkout = firstWorkoutState?.state.firstWorkout || '';
@@ -43,14 +49,21 @@ const WorkoutCalendar = () => {
 		[],
 	);
 
-  const handleDataSet = (arg: { startStr: string; endStr: string }) => {
-    let startDateArg = arg.startStr.split('T')[0]
-    let endDateArg = arg.endStr.split('T')[0]
+  const handleDataSet = useCallback((arg: { start: Date; end: Date }) => {
+    const startDateArg = formatLocalDate(arg.start);
+    const endDateArg = formatLocalDate(arg.end);
+    if (!isIsoDateString(startDateArg) || !isIsoDateString(endDateArg)) {
+      return;
+    }
+
+    syncVisibleRangeRef.current(startDateArg, endDateArg);
+
     if (calendarState.startDate === startDateArg && calendarState.endDate === endDateArg) {
       return;
     }
-    fetchEvents(startDateArg, endDateArg);
-  }
+
+    void fetchEventsRef.current(startDateArg, endDateArg);
+  }, [calendarState.startDate, calendarState.endDate]);
 
   useEffect(() => {
     sendFlaggedDayRequest();
