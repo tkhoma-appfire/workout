@@ -1,14 +1,41 @@
 import WorkoutPieChart from "@/components/general/UI/chart/WorkoutPieChart";
 import WorkoutDetail from "@/components/general/WorkoutDetail";
-import { useState } from "react";
-import { useLoaderData, useRevalidator, type LoaderFunctionArgs } from "react-router-dom";
+import { Suspense, useState } from "react";
+import {
+  Await,
+  useLoaderData,
+  useRevalidator,
+  type LoaderFunctionArgs,
+} from "react-router-dom";
 import { apiUrl } from "@/utils/http";
+import type { WorkoutType } from "@/types";
 
-const Favorite = () => {
-  const favorites = useLoaderData() as any[];
+function loadFavorites(): Promise<WorkoutType[]> {
+  return fetch(apiUrl("/api/favorites"), {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  }).then((response) => {
+    if (!response.ok) {
+      throw new Response("Not Found", { status: 404 });
+    }
+    return response.json() as Promise<WorkoutType[]>;
+  });
+}
+
+function FavoritesLoading() {
+  return (
+    <div className="mt-14 w-full pr-2 text-center text-slate-500">
+      Loading favorites…
+    </div>
+  );
+}
+
+function FavoritesBody({ favorites }: { favorites: WorkoutType[] }) {
   const { revalidate } = useRevalidator();
-  const [rightWorkout, setRightWorkout] = useState(null);
-  const [leftWorkout, setLeftWorkout] = useState(null);
+  const [rightWorkout, setRightWorkout] = useState<any>(null);
+  const [leftWorkout, setLeftWorkout] = useState<any>(null);
 
   const selectWorkout = (workout: any, checked: boolean) => {
     if (checked) {
@@ -19,7 +46,7 @@ const Favorite = () => {
   };
 
   return (
-    <div className="mx-16">
+    <>
       <div className="w-full mt-14 pr-2">
         <WorkoutDetail
           workouts={favorites}
@@ -37,21 +64,40 @@ const Favorite = () => {
           <WorkoutPieChart workout={rightWorkout} />
         </div>
       </div>
+    </>
+  );
+}
+
+const Favorite = () => {
+  const { favorites } = useLoaderData() as {
+    favorites: Promise<WorkoutType[]>;
+  };
+
+  return (
+    <div className="mx-16">
+      <Suspense fallback={<FavoritesLoading />}>
+        <Await
+          resolve={favorites}
+          errorElement={
+            <div className="mt-14 w-full pr-2 text-center text-red-600">
+              Failed to load favorites.
+            </div>
+          }
+        >
+          {(favoriteWorkouts: WorkoutType[]) => (
+            <FavoritesBody favorites={favoriteWorkouts} />
+          )}
+        </Await>
+      </Suspense>
     </div>
   );
 };
 
 export default Favorite;
 
-export async function loader(
-  _args: LoaderFunctionArgs,
-): Promise<any[]> {
-  const response = await fetch(apiUrl("/api/favorites"), {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
-  if (!response.ok) throw new Response("Not Found", { status: 404 });
-  return (await response.json()) as any[];
+export function loader(_args: LoaderFunctionArgs) {
+  void _args;
+  return {
+    favorites: loadFavorites(),
+  };
 }
