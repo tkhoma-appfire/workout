@@ -22,12 +22,25 @@ export function mapCalendarEventRow(row: CalendarEventRow): CalendarEventModel {
   };
 }
 
+const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
+
+function isValidIsoDate(value: string): boolean {
+  if (!ISO_DATE.test(value)) {
+    return false;
+  }
+  const parsed = new Date(`${value}T12:00:00`);
+  return !Number.isNaN(parsed.getTime());
+}
+
 function assertDateRange(range: DateRange | null | undefined): DateRange {
-  if (!range?.startDate || !range?.endDate) {
+  const startDate = range?.startDate?.trim() ?? "";
+  const endDate = range?.endDate?.trim() ?? "";
+
+  if (!isValidIsoDate(startDate) || !isValidIsoDate(endDate)) {
     throw new Error("startDate and endDate are required");
   }
 
-  return range;
+  return { startDate, endDate };
 }
 
 export async function getCalendarEvents(

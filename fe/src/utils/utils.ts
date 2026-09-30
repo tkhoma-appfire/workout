@@ -1,5 +1,16 @@
 import type { WorkoutType, YearlyWorkoutType } from "@/types"
 
+const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
+
+export function isValidIsoDateString(date: string): boolean {
+	if (!ISO_DATE.test(date)) {
+		return false;
+	  }
+	
+	  const parsed = new Date(`${date}T12:00:00`);
+	  return !Number.isNaN(parsed.getTime());
+}
+
 export function formatGroupedNumber(value: unknown): string {
   if (value == null || value === "") {
     return "0";

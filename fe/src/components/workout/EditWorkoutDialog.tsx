@@ -116,7 +116,7 @@ const EditWorkoutDialog = ({ open, workout, onClose, onSaved }: EditWorkoutDialo
           order: index + 1,
         })),
       });
-      await refreshCalendarEvents();
+      await refreshCalendarEvents({ anchorDate: formData.date });
       await fetchCurrentPeriodWorkouts();
       message.success("Workout updated");
       onSaved?.();

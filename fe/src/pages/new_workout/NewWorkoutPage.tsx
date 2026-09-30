@@ -106,13 +106,15 @@ const NewWorkoutPage = () => {
       })),
     };
 
+    const workoutDate = formData.date;
+
     message.success("Workout submitted");
     navigate("/month");
 
     void (async () => {
       try {
         await addWorkout(payload);
-        await refreshCalendarEvents();
+        await refreshCalendarEvents({ anchorDate: workoutDate });
         await fetchCurrentPeriodWorkouts();
         revalidator.revalidate();
       } catch {

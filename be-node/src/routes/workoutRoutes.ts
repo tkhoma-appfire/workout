@@ -75,6 +75,13 @@ export function createWorkoutRoutes(pool: Pool): Router {
   router.post("/calendar_events", async (req, res) => {
     try {
       const range = req.body as DateRange | null | undefined;
+      const startDate = range?.startDate?.trim() ?? "";
+      const endDate = range?.endDate?.trim() ?? "";
+      if (!startDate || !endDate) {
+        res.json([]);
+        return;
+      }
+
       const events = await getCalendarEvents(pool, range);
       res.json(events);
     } catch (error) {

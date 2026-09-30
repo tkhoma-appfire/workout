@@ -1,9 +1,14 @@
 import { BASE_URL_DEVELOPMENT } from "@/constants";
 import type { NewWorkoutFormData } from "@/types";
+import { isIsoDateString } from "@/utils/date";
 
 export const apiUrl = (path: string) => `${BASE_URL_DEVELOPMENT}${path}`;
 
 export const fetchCalendarEvents = async (startDate: string, endDate: string) => {
+	if (!isIsoDateString(startDate) || !isIsoDateString(endDate)) {
+		return [];
+	}
+
  	const response = await fetch(
  		apiUrl('/api/calendar_events'),
 		{
