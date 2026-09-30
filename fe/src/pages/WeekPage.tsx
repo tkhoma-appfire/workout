@@ -7,7 +7,13 @@ import { buildWeekSelectOptions, resolveSelectedWeekValue } from "@/utils/weekSe
 import { apiUrl } from "@/utils/http";
 import { Await, useLoaderData, useSearchParams } from "react-router-dom";
 import type { WorkoutData } from "@/types";
-import { formatMonthlyChartData, formatGroupedNumber } from "@/utils/utils";
+import { formatMonthlyChartData } from "@/utils/utils";
+import PeriodStatisticsRow from "@/components/dashboard/PeriodStatisticsRow";
+import {
+  formatLoadComparisonLabel,
+  previousWeekPeriod,
+  totalTrainingLoad,
+} from "@/utils/periodComparison";
 import WorkoutDetail from "@/components/general/WorkoutDetail";
 import WorkoutBarChart from "@/components/general/UI/chart/WorkoutBarChart";
 import WeekSelector from "@/components/dashboard/WeekSelector";
@@ -32,6 +38,30 @@ function loadWeekWorkouts(startOfPeriod: string): Promise<WorkoutData> {
   });
 }
 
+export type WeekPageWorkoutBundle = {
+  current: WorkoutData;
+  loadComparisonLabel: string | null;
+};
+
+function loadWeekWorkoutsWithComparison(
+  startOfPeriod: string,
+  weekAnchor: Date,
+): Promise<WeekPageWorkoutBundle> {
+  const previousPeriod = previousWeekPeriod(weekAnchor);
+
+  return Promise.all([
+    loadWeekWorkouts(startOfPeriod),
+    loadWeekWorkouts(previousPeriod),
+  ]).then(([current, previous]) => ({
+    current,
+    loadComparisonLabel: formatLoadComparisonLabel(
+      totalTrainingLoad(current.content),
+      totalTrainingLoad(previous.content),
+      "last week",
+    ),
+  }));
+}
+
 function WeekWorkoutsLoading() {
   return (
     <div className="mt-8 w-full px-16 text-center text-slate-500">
@@ -40,7 +70,8 @@ function WeekWorkoutsLoading() {
   );
 }
 
-function WeekWorkoutsBody({ workouts }: { workouts: WorkoutData }) {
+function WeekWorkoutsBody({ bundle }: { bundle: WeekPageWorkoutBundle }) {
+  const { current: workouts, loadComparisonLabel } = bundle;
   const chartData = formatMonthlyChartData(workouts.content);
 
   const handleSelectBar = (data: unknown) => {
@@ -49,11 +80,10 @@ function WeekWorkoutsBody({ workouts }: { workouts: WorkoutData }) {
 
   return (
     <>
-      <div className="flex justify-evenly w-full font-semibold text-lg px-16 mt-4">
-        <div className="whitespace-nowrap">{workouts.statistics.exerciseTime}</div>
-        <div className="whitespace-nowrap">{formatGroupedNumber(workouts.statistics.calories)} ccal</div>
-        <div className="whitespace-nowrap">{workouts.totalElements} workouts</div>
-      </div>
+      <PeriodStatisticsRow
+        workouts={workouts}
+        loadComparisonLabel={loadComparisonLabel}
+      />
       <div className="w-full mt-4 pr-2">
         <WorkoutBarChart
           payload={chartData}
@@ -72,7 +102,7 @@ function WeekWorkoutsBody({ workouts }: { workouts: WorkoutData }) {
 
 const WeekPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const { workouts } = useLoaderData() as { workouts: Promise<WorkoutData> };
+  const { workouts } = useLoaderData() as { workouts: Promise<WeekPageWorkoutBundle> };
   const firstWorkoutState = useContext(FirstWorkoutContext);
   const firstWorkout = firstWorkoutState?.state.firstWorkout ?? "";
   const searchStart = searchParams.get("start");
@@ -114,7 +144,7 @@ const WeekPage = () => {
             </div>
           }
         >
-          {(workoutData: WorkoutData) => <WeekWorkoutsBody workouts={workoutData} />}
+          {(bundle: WeekPageWorkoutBundle) => <WeekWorkoutsBody bundle={bundle} />}
         </Await>
       </Suspense>
     </div>
@@ -124,10 +154,11 @@ const WeekPage = () => {
 export function loader(params: { request: Request }) {
   const url = new URL(params.request.url);
   const searchStart = url.searchParams.get("start");
-  const startOfPeriod = formatWeekPeriodRange(parseWeekAnchor(searchStart));
+  const weekAnchor = parseWeekAnchor(searchStart);
+  const startOfPeriod = formatWeekPeriodRange(weekAnchor);
 
   return {
-    workouts: loadWeekWorkouts(startOfPeriod),
+    workouts: loadWeekWorkoutsWithComparison(startOfPeriod, weekAnchor),
   };
 }
 

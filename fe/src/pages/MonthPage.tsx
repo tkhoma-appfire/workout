@@ -8,7 +8,13 @@ import {
   useSearchParams,
 } from "react-router-dom";
 import WorkoutBarChart from "@/components/general/UI/chart/WorkoutBarChart";
-import { formatMonthlyChartData, formatGroupedNumber } from "@/utils/utils";
+import { formatMonthlyChartData } from "@/utils/utils";
+import PeriodStatisticsRow from "@/components/dashboard/PeriodStatisticsRow";
+import {
+  formatLoadComparisonLabel,
+  previousMonthPeriod,
+  totalTrainingLoad,
+} from "@/utils/periodComparison";
 import type { WorkoutData, WorkoutType } from "@/types";
 import WorkoutDetail from "@/components/general/WorkoutDetail";
 import EditWorkoutDialog from "@/components/workout/EditWorkoutDialog";
@@ -53,6 +59,29 @@ function loadMonthWorkouts(startOfPeriod: string): Promise<WorkoutData> {
   });
 }
 
+export type MonthPageWorkoutBundle = {
+  current: WorkoutData;
+  loadComparisonLabel: string | null;
+};
+
+function loadMonthWorkoutsWithComparison(
+  startOfPeriod: string,
+): Promise<MonthPageWorkoutBundle> {
+  const previousPeriod = previousMonthPeriod(startOfPeriod);
+
+  return Promise.all([
+    loadMonthWorkouts(startOfPeriod),
+    loadMonthWorkouts(previousPeriod),
+  ]).then(([current, previous]) => ({
+    current,
+    loadComparisonLabel: formatLoadComparisonLabel(
+      totalTrainingLoad(current.content),
+      totalTrainingLoad(previous.content),
+      "last month",
+    ),
+  }));
+}
+
 function MonthWorkoutsLoading() {
   return (
     <div className="mt-8 w-full px-16 text-center text-slate-500">
@@ -61,7 +90,8 @@ function MonthWorkoutsLoading() {
   );
 }
 
-function MonthWorkoutsBody({ workouts }: { workouts: WorkoutData }) {
+function MonthWorkoutsBody({ bundle }: { bundle: MonthPageWorkoutBundle }) {
+  const { current: workouts, loadComparisonLabel } = bundle;
   const revalidator = useRevalidator();
   const [editOpen, setEditOpen] = useState(false);
   const [editingWorkout, setEditingWorkout] = useState<WorkoutType | null>(null);
@@ -79,11 +109,10 @@ function MonthWorkoutsBody({ workouts }: { workouts: WorkoutData }) {
 
   return (
     <>
-      <div className="flex justify-evenly w-full font-semibold text-lg px-16 mt-4">
-        <div className="whitespace-nowrap">{workouts.statistics.exerciseTime}</div>
-        <div className="whitespace-nowrap">{formatGroupedNumber(workouts.statistics.calories)} ccal</div>
-        <div className="whitespace-nowrap">{workouts.totalElements} workouts</div>
-      </div>
+      <PeriodStatisticsRow
+        workouts={workouts}
+        loadComparisonLabel={loadComparisonLabel}
+      />
       <div className="w-full mt-4 pr-2">
         <WorkoutBarChart
           payload={chartData}
@@ -119,7 +148,7 @@ const MonthPage = () => {
   } | undefined = useContext(FirstWorkoutContext);
   const firstWorkout = firstWorkoutState?.state.firstWorkout || '';
   const [searchParams, setSearchParams] = useSearchParams();
-  const { workouts } = useLoaderData() as { workouts: Promise<WorkoutData> };
+  const { workouts } = useLoaderData() as { workouts: Promise<MonthPageWorkoutBundle> };
 
   return (
     <div className="w-full flex flex-col items-center">
@@ -143,7 +172,7 @@ const MonthPage = () => {
             </div>
           }
         >
-          {(workoutData: WorkoutData) => <MonthWorkoutsBody workouts={workoutData} />}
+          {(bundle: MonthPageWorkoutBundle) => <MonthWorkoutsBody bundle={bundle} />}
         </Await>
       </Suspense>
     </div>
@@ -155,7 +184,7 @@ export function loader(params: { request: Request }) {
   const startOfPeriod = normalizeStartOfPeriod(url.searchParams.get("start"));
 
   return {
-    workouts: loadMonthWorkouts(startOfPeriod),
+    workouts: loadMonthWorkoutsWithComparison(startOfPeriod),
   };
 }
 
