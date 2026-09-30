@@ -3,7 +3,7 @@ import type { WorkoutData } from "@/types";
 
 type PeriodStatisticsRowProps = {
   workouts: WorkoutData;
-  loadComparisonLabel?: string | null;
+  loadComparisonLabel: string;
 };
 
 export default function PeriodStatisticsRow({
@@ -18,11 +18,9 @@ export default function PeriodStatisticsRow({
           {formatGroupedNumber(workouts.statistics.calories)} ccal
         </div>
         <div className="whitespace-nowrap">{workouts.totalElements} workouts</div>
-        {loadComparisonLabel && (
-          <div className="whitespace-nowrap text-base font-medium text-sky-700">
-            {loadComparisonLabel}
-          </div>
-        )}
+        <div className="whitespace-nowrap text-base font-medium text-sky-700">
+          {loadComparisonLabel}
+        </div>
       </div>
     </div>
   );

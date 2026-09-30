@@ -3,13 +3,24 @@ import express from "express";
 import type { Pool } from "pg";
 import { createWorkoutRoutes } from "./routes/workoutRoutes.js";
 
+const LOCAL_VITE_ORIGINS = ["http://localhost:5173", "http://localhost:5173/"];
+
+const DEFAULT_ORIGINS = [
+  ...LOCAL_VITE_ORIGINS,
+  "https://workout-8djdlmtuw-secondffgfs-projects.vercel.app",
+];
+
+function normalizeOrigin(origin: string): string {
+  return origin.trim().replace(/\/$/, "");
+}
+
 function getAllowedOrigins(): string[] {
   const configured = process.env.CORS_ORIGINS;
-  if (configured) {
-    return configured.split(",").map((origin) => origin.trim()).filter(Boolean);
-  }
+  const fromEnv = configured
+    ? configured.split(",").map((origin) => normalizeOrigin(origin)).filter(Boolean)
+    : [];
 
-  return ["http://localhost:5173", "https://workout-ne921qvqb-secondffgfs-projects.vercel.app", "https://workout-fe-git-master-secondffgfs-projects.vercel.app"];
+  return [...new Set([...DEFAULT_ORIGINS.map(normalizeOrigin), ...fromEnv])];
 }
 
 export function createApp(pool: Pool) {
@@ -17,7 +28,8 @@ export function createApp(pool: Pool) {
 
   app.use(cors({
     origin(origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) {
-      if (!origin || getAllowedOrigins().includes(origin)) {
+      const allowed = getAllowedOrigins();
+      if (!origin || allowed.includes(normalizeOrigin(origin))) {
         callback(null, true);
         return;
       }

@@ -11,9 +11,9 @@ import WorkoutBarChart from "@/components/general/UI/chart/WorkoutBarChart";
 import { formatMonthlyChartData } from "@/utils/utils";
 import PeriodStatisticsRow from "@/components/dashboard/PeriodStatisticsRow";
 import {
-  formatLoadComparisonLabel,
+  buildPeriodComparisonLabel,
+  emptyWorkoutData,
   previousMonthPeriod,
-  totalTrainingLoad,
 } from "@/utils/periodComparison";
 import type { WorkoutData, WorkoutType } from "@/types";
 import WorkoutDetail from "@/components/general/WorkoutDetail";
@@ -61,7 +61,7 @@ function loadMonthWorkouts(startOfPeriod: string): Promise<WorkoutData> {
 
 export type MonthPageWorkoutBundle = {
   current: WorkoutData;
-  loadComparisonLabel: string | null;
+  loadComparisonLabel: string;
 };
 
 function loadMonthWorkoutsWithComparison(
@@ -69,17 +69,14 @@ function loadMonthWorkoutsWithComparison(
 ): Promise<MonthPageWorkoutBundle> {
   const previousPeriod = previousMonthPeriod(startOfPeriod);
 
-  return Promise.all([
-    loadMonthWorkouts(startOfPeriod),
-    loadMonthWorkouts(previousPeriod),
-  ]).then(([current, previous]) => ({
-    current,
-    loadComparisonLabel: formatLoadComparisonLabel(
-      totalTrainingLoad(current.content),
-      totalTrainingLoad(previous.content),
-      "last month",
-    ),
-  }));
+  return loadMonthWorkouts(startOfPeriod).then(async (current) => {
+    const previous = await loadMonthWorkouts(previousPeriod).catch(() => emptyWorkoutData());
+
+    return {
+      current,
+      loadComparisonLabel: buildPeriodComparisonLabel(current, previous, "last month"),
+    };
+  });
 }
 
 function MonthWorkoutsLoading() {

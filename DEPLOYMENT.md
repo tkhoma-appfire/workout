@@ -29,7 +29,7 @@ Optional:
 
 | Variable | Description |
 |----------|-------------|
-| `CORS_ORIGINS` | Only needed if calling the API from another origin |
+| `CORS_ORIGINS` | Extra comma-separated origins (always includes `http://localhost:5173` for local Vite) |
 
 ## Local development
 

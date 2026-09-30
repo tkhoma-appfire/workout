@@ -10,9 +10,9 @@ import type { WorkoutData } from "@/types";
 import { formatMonthlyChartData } from "@/utils/utils";
 import PeriodStatisticsRow from "@/components/dashboard/PeriodStatisticsRow";
 import {
-  formatLoadComparisonLabel,
+  buildPeriodComparisonLabel,
+  emptyWorkoutData,
   previousWeekPeriod,
-  totalTrainingLoad,
 } from "@/utils/periodComparison";
 import WorkoutDetail from "@/components/general/WorkoutDetail";
 import WorkoutBarChart from "@/components/general/UI/chart/WorkoutBarChart";
@@ -40,7 +40,7 @@ function loadWeekWorkouts(startOfPeriod: string): Promise<WorkoutData> {
 
 export type WeekPageWorkoutBundle = {
   current: WorkoutData;
-  loadComparisonLabel: string | null;
+  loadComparisonLabel: string;
 };
 
 function loadWeekWorkoutsWithComparison(
@@ -49,17 +49,14 @@ function loadWeekWorkoutsWithComparison(
 ): Promise<WeekPageWorkoutBundle> {
   const previousPeriod = previousWeekPeriod(weekAnchor);
 
-  return Promise.all([
-    loadWeekWorkouts(startOfPeriod),
-    loadWeekWorkouts(previousPeriod),
-  ]).then(([current, previous]) => ({
-    current,
-    loadComparisonLabel: formatLoadComparisonLabel(
-      totalTrainingLoad(current.content),
-      totalTrainingLoad(previous.content),
-      "last week",
-    ),
-  }));
+  return loadWeekWorkouts(startOfPeriod).then(async (current) => {
+    const previous = await loadWeekWorkouts(previousPeriod).catch(() => emptyWorkoutData());
+
+    return {
+      current,
+      loadComparisonLabel: buildPeriodComparisonLabel(current, previous, "last week"),
+    };
+  });
 }
 
 function WeekWorkoutsLoading() {
