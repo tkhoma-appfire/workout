@@ -57,3 +57,15 @@ VITE_API_BASE_URL=https://your-old-api.vercel.app
 - Migrations run automatically on first API cold start (`be-node` bootstrap).
 - Large ZIP imports may hit Vercel request body limits.
 - Deploy from the **repository root**, not `be-node/` alone.
+
+## Caching (why production can look “stale”)
+
+Vercel’s CDN caches **hashed** files under `/assets/*` for a long time (that is correct). The **HTML shell** (`index.html`) must stay fresh so it points at the latest JS hashes.
+
+`vercel.json` sets `Cache-Control: no-cache` on `/index.html` and long cache on `/assets/*`.
+
+If the live site still looks old after a deploy:
+
+1. Hard refresh or open in a private window.
+2. In DevTools → Network, confirm the main `index-*.js` filename changed after deploy.
+3. Redeploy from the latest commit on the branch Vercel builds (not an old preview URL).

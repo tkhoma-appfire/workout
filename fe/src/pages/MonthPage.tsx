@@ -10,11 +10,7 @@ import {
 import WorkoutBarChart from "@/components/general/UI/chart/WorkoutBarChart";
 import { formatMonthlyChartData } from "@/utils/utils";
 import PeriodStatisticsRow from "@/components/dashboard/PeriodStatisticsRow";
-import {
-  buildPeriodComparisonLabel,
-  emptyWorkoutData,
-  previousMonthPeriod,
-} from "@/utils/periodComparison";
+import { usePeriodComparisonLabel } from "@/hooks/usePeriodComparisonLabel";
 import type { WorkoutData, WorkoutType } from "@/types";
 import WorkoutDetail from "@/components/general/WorkoutDetail";
 import EditWorkoutDialog from "@/components/workout/EditWorkoutDialog";
@@ -27,7 +23,7 @@ const formatMonthValue = (date: Date) =>
     year: "numeric",
   }).format(date);
 
-const normalizeStartOfPeriod = (startParam: string | null) => {
+export const normalizeStartOfPeriod = (startParam: string | null) => {
   if (!startParam) {
     return formatMonthValue(new Date());
   }
@@ -40,7 +36,7 @@ const normalizeStartOfPeriod = (startParam: string | null) => {
   return formatMonthValue(parsed);
 };
 
-function loadMonthWorkouts(startOfPeriod: string): Promise<WorkoutData> {
+export function loadMonthWorkouts(startOfPeriod: string): Promise<WorkoutData> {
   return fetch(apiUrl("/api/workouts"), {
     method: "POST",
     headers: {
@@ -59,26 +55,6 @@ function loadMonthWorkouts(startOfPeriod: string): Promise<WorkoutData> {
   });
 }
 
-export type MonthPageWorkoutBundle = {
-  current: WorkoutData;
-  loadComparisonLabel: string;
-};
-
-function loadMonthWorkoutsWithComparison(
-  startOfPeriod: string,
-): Promise<MonthPageWorkoutBundle> {
-  const previousPeriod = previousMonthPeriod(startOfPeriod);
-
-  return loadMonthWorkouts(startOfPeriod).then(async (current) => {
-    const previous = await loadMonthWorkouts(previousPeriod).catch(() => emptyWorkoutData());
-
-    return {
-      current,
-      loadComparisonLabel: buildPeriodComparisonLabel(current, previous, "last month"),
-    };
-  });
-}
-
 function MonthWorkoutsLoading() {
   return (
     <div className="mt-8 w-full px-16 text-center text-slate-500">
@@ -87,8 +63,19 @@ function MonthWorkoutsLoading() {
   );
 }
 
-function MonthWorkoutsBody({ bundle }: { bundle: MonthPageWorkoutBundle }) {
-  const { current: workouts, loadComparisonLabel } = bundle;
+type MonthWorkoutsBodyProps = {
+  workouts: WorkoutData;
+  startOfPeriod: string;
+};
+
+function MonthWorkoutsBody({ workouts, startOfPeriod }: MonthWorkoutsBodyProps) {
+  const loadComparisonLabel = usePeriodComparisonLabel(
+    workouts,
+    "month",
+    startOfPeriod,
+    loadMonthWorkouts,
+    "last month",
+  );
   const revalidator = useRevalidator();
   const [editOpen, setEditOpen] = useState(false);
   const [editingWorkout, setEditingWorkout] = useState<WorkoutType | null>(null);
@@ -145,12 +132,13 @@ const MonthPage = () => {
   } | undefined = useContext(FirstWorkoutContext);
   const firstWorkout = firstWorkoutState?.state.firstWorkout || '';
   const [searchParams, setSearchParams] = useSearchParams();
-  const { workouts } = useLoaderData() as { workouts: Promise<MonthPageWorkoutBundle> };
+  const { workouts } = useLoaderData() as { workouts: Promise<WorkoutData> };
+  const startOfPeriod = normalizeStartOfPeriod(searchParams.get("start"));
 
   return (
     <div className="w-full flex flex-col items-center">
       <MonthSelector
-        value={normalizeStartOfPeriod(searchParams.get("start"))}
+        value={startOfPeriod}
         onChange={(newMonth: string) => {
           setSearchParams((prevParams: URLSearchParams) => {
             const nextParams = new URLSearchParams(prevParams);
@@ -169,7 +157,9 @@ const MonthPage = () => {
             </div>
           }
         >
-          {(bundle: MonthPageWorkoutBundle) => <MonthWorkoutsBody bundle={bundle} />}
+          {(workoutData: WorkoutData) => (
+            <MonthWorkoutsBody workouts={workoutData} startOfPeriod={startOfPeriod} />
+          )}
         </Await>
       </Suspense>
     </div>
@@ -181,7 +171,7 @@ export function loader(params: { request: Request }) {
   const startOfPeriod = normalizeStartOfPeriod(url.searchParams.get("start"));
 
   return {
-    workouts: loadMonthWorkoutsWithComparison(startOfPeriod),
+    workouts: loadMonthWorkouts(startOfPeriod),
   };
 }
 

@@ -9,17 +9,13 @@ import { Await, useLoaderData, useSearchParams } from "react-router-dom";
 import type { WorkoutData } from "@/types";
 import { formatMonthlyChartData } from "@/utils/utils";
 import PeriodStatisticsRow from "@/components/dashboard/PeriodStatisticsRow";
-import {
-  buildPeriodComparisonLabel,
-  emptyWorkoutData,
-  previousWeekPeriod,
-} from "@/utils/periodComparison";
+import { usePeriodComparisonLabel } from "@/hooks/usePeriodComparisonLabel";
 import WorkoutDetail from "@/components/general/WorkoutDetail";
 import WorkoutBarChart from "@/components/general/UI/chart/WorkoutBarChart";
 import WeekSelector from "@/components/dashboard/WeekSelector";
 import { FirstWorkoutContext } from "@/context/FirstWorkoutContextProvider";
 
-function loadWeekWorkouts(startOfPeriod: string): Promise<WorkoutData> {
+export function loadWeekWorkouts(startOfPeriod: string): Promise<WorkoutData> {
   return fetch(apiUrl("/api/workouts"), {
     method: "POST",
     headers: {
@@ -38,27 +34,6 @@ function loadWeekWorkouts(startOfPeriod: string): Promise<WorkoutData> {
   });
 }
 
-export type WeekPageWorkoutBundle = {
-  current: WorkoutData;
-  loadComparisonLabel: string;
-};
-
-function loadWeekWorkoutsWithComparison(
-  startOfPeriod: string,
-  weekAnchor: Date,
-): Promise<WeekPageWorkoutBundle> {
-  const previousPeriod = previousWeekPeriod(weekAnchor);
-
-  return loadWeekWorkouts(startOfPeriod).then(async (current) => {
-    const previous = await loadWeekWorkouts(previousPeriod).catch(() => emptyWorkoutData());
-
-    return {
-      current,
-      loadComparisonLabel: buildPeriodComparisonLabel(current, previous, "last week"),
-    };
-  });
-}
-
 function WeekWorkoutsLoading() {
   return (
     <div className="mt-8 w-full px-16 text-center text-slate-500">
@@ -67,8 +42,19 @@ function WeekWorkoutsLoading() {
   );
 }
 
-function WeekWorkoutsBody({ bundle }: { bundle: WeekPageWorkoutBundle }) {
-  const { current: workouts, loadComparisonLabel } = bundle;
+type WeekWorkoutsBodyProps = {
+  workouts: WorkoutData;
+  weekStartParam: string | null;
+};
+
+function WeekWorkoutsBody({ workouts, weekStartParam }: WeekWorkoutsBodyProps) {
+  const loadComparisonLabel = usePeriodComparisonLabel(
+    workouts,
+    "week",
+    weekStartParam ?? "",
+    loadWeekWorkouts,
+    "last week",
+  );
   const chartData = formatMonthlyChartData(workouts.content);
 
   const handleSelectBar = (data: unknown) => {
@@ -99,7 +85,7 @@ function WeekWorkoutsBody({ bundle }: { bundle: WeekPageWorkoutBundle }) {
 
 const WeekPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const { workouts } = useLoaderData() as { workouts: Promise<WeekPageWorkoutBundle> };
+  const { workouts } = useLoaderData() as { workouts: Promise<WorkoutData> };
   const firstWorkoutState = useContext(FirstWorkoutContext);
   const firstWorkout = firstWorkoutState?.state.firstWorkout ?? "";
   const searchStart = searchParams.get("start");
@@ -141,7 +127,9 @@ const WeekPage = () => {
             </div>
           }
         >
-          {(bundle: WeekPageWorkoutBundle) => <WeekWorkoutsBody bundle={bundle} />}
+          {(workoutData: WorkoutData) => (
+            <WeekWorkoutsBody workouts={workoutData} weekStartParam={searchStart} />
+          )}
         </Await>
       </Suspense>
     </div>
@@ -151,11 +139,10 @@ const WeekPage = () => {
 export function loader(params: { request: Request }) {
   const url = new URL(params.request.url);
   const searchStart = url.searchParams.get("start");
-  const weekAnchor = parseWeekAnchor(searchStart);
-  const startOfPeriod = formatWeekPeriodRange(weekAnchor);
+  const startOfPeriod = formatWeekPeriodRange(parseWeekAnchor(searchStart));
 
   return {
-    workouts: loadWeekWorkoutsWithComparison(startOfPeriod, weekAnchor),
+    workouts: loadWeekWorkouts(startOfPeriod),
   };
 }
 
