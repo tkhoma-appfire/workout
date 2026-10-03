@@ -1,4 +1,4 @@
-import { Button, Checkbox, Select } from "antd";
+import { App, Button, Checkbox, Select } from "antd";
 import { Suspense, useState } from "react";
 import { Await, useLoaderData, type LoaderFunctionArgs } from "react-router-dom";
 import type { ExerciseNameOption, WorkoutType } from "@/types";
@@ -100,6 +100,7 @@ function SearchWorkoutsSection({
 }
 
 const SearchAndCompare = () => {
+  const { message } = App.useApp();
   const { exerciseOptions, initialWorkouts } = useLoaderData() as {
     exerciseOptions: Promise<ExerciseNameOption[]>;
     initialWorkouts: Promise<WorkoutType[]>;
@@ -114,6 +115,9 @@ const SearchAndCompare = () => {
     try {
       const data = await loadSearchWorkouts(selectedIds, onlySelected);
       setWorkouts(data);
+      if (data.length === 0) {
+        message.info("No workouts found for the selected exercises.");
+      }
     } finally {
       setLoading(false);
     }
