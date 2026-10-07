@@ -415,7 +415,7 @@ Returns all favorite workouts as `SingleWorkoutModel[]`, ordered by most recentl
 
 ### `GET /api/flagged`
 
-Returns workouts for flagged days. A flagged day maps to the workout on the following calendar day (same rule as the Java backend).
+Returns workouts whose `date` matches a row in `flagged.day` (`yyyy-MM-dd`).
 
 **Response `200`**
 
