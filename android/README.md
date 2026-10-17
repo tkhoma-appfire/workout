@@ -25,13 +25,13 @@ make install-debug
 
 ## Launcher icon
 
-Icons are generated from `fe/public/logo.png`:
+Icons are generated from `assets/app-logo.jpeg`:
 
 ```bash
 ./scripts/generate-android-icons.sh
 ```
 
-Requires ImageMagick (`magick`). Adaptive icon background is black (`res/values/colors.xml`).
+Requires ImageMagick (`magick`). Adaptive icon background matches the photo (`#525657` in `res/values/colors.xml`).
 
 ## App entry
 

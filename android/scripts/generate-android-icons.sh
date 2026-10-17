@@ -3,8 +3,9 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-LOGO="${ROOT}/../fe/public/logo.png"
+LOGO="${ROOT}/assets/app-logo.jpeg"
 RES="${ROOT}/android/app/src/main/res"
+ICON_BG="#525657"
 
 if [[ ! -f "$LOGO" ]]; then
   echo "Logo not found: $LOGO" >&2
@@ -17,14 +18,14 @@ generate() {
   local fg="$3"
   local dir="${RES}/mipmap-${dpi}"
 
-  magick "$LOGO" -resize "${legacy}x${legacy}>" -background black -gravity center \
+  magick "$LOGO" -resize "${legacy}x${legacy}>" -background "$ICON_BG" -gravity center \
     -extent "${legacy}x${legacy}" "${dir}/ic_launcher.png"
 
   magick "${dir}/ic_launcher.png" \
     \( -size "${legacy}x${legacy}" xc:none -draw "fill white circle $((legacy/2)),$((legacy/2)) $((legacy/2)),0" \) \
     -alpha Off -compose CopyOpacity -composite "${dir}/ic_launcher_round.png"
 
-  magick "$LOGO" -resize "${fg}x${fg}>" -background black -gravity center \
+  magick "$LOGO" -resize "${fg}x${fg}>" -background "$ICON_BG" -gravity center \
     -extent "${fg}x${fg}" "${dir}/ic_launcher_foreground.png"
 }
 
