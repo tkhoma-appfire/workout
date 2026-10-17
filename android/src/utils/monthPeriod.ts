@@ -52,6 +52,18 @@ export function monthStart(date: Date): Date {
   return new Date(date.getFullYear(), date.getMonth(), 1);
 }
 
+export function isSameCalendarMonth(a: Date, b: Date): boolean {
+  return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth();
+}
+
+export function isSelectedMonthCurrent(startOfPeriod: string): boolean {
+  return isSameCalendarMonth(parseMonthPeriod(startOfPeriod), new Date());
+}
+
+export function formatMonthNameOnly(date: Date): string {
+  return new Intl.DateTimeFormat('en', {month: 'long'}).format(date);
+}
+
 /** Weekdays (Mon–Fri) in the calendar month of `anchor`. */
 export function countWorkingDaysInMonth(anchor: Date): number {
   const year = anchor.getFullYear();

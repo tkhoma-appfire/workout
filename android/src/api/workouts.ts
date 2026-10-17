@@ -32,3 +32,22 @@ export async function loadMonthWorkouts(
 
   return response.json() as Promise<WorkoutData>;
 }
+
+export async function loadWeekWorkouts(
+  startOfPeriod: string,
+): Promise<WorkoutData> {
+  const response = await fetch(apiUrl('/api/workouts'), {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({
+      timePeriod: 'WEEK',
+      startOfPeriod,
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to load workouts for this week');
+  }
+
+  return response.json() as Promise<WorkoutData>;
+}

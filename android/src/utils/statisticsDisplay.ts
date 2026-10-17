@@ -1,5 +1,39 @@
 import type {WorkoutData} from '../types/workout';
 
+export function formatGroupedNumber(value: unknown): string {
+  if (value == null || value === '') {
+    return '0';
+  }
+
+  const numeric =
+    typeof value === 'number'
+      ? value
+      : Number(String(value).replace(/\s/g, ''));
+
+  if (!Number.isFinite(numeric)) {
+    return String(value);
+  }
+
+  const absolute = Math.trunc(Math.abs(numeric));
+  const digits = String(absolute);
+  const parts: string[] = [];
+
+  for (let index = digits.length; index > 0; index -= 3) {
+    parts.unshift(digits.slice(Math.max(0, index - 3), index));
+  }
+
+  const grouped = parts.join('\u00a0');
+  return numeric < 0 ? `-${grouped}` : grouped;
+}
+
+export function formatAvgCaloriesPerSession(data: WorkoutData): string {
+  if (data.totalElements === 0) {
+    return 'No sessions this month';
+  }
+  const avg = Math.round(data.statistics.calories / data.totalElements);
+  return `Avg ${formatGroupedNumber(avg)} kcal / session`;
+}
+
 export function parseExerciseTimeToMinutes(exerciseTime: string): number {
   const parts = exerciseTime.split(':').map(part => Number(part));
   const hours = parts[0] ?? 0;

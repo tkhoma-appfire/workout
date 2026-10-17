@@ -41,12 +41,17 @@ export function useMonthDashboard(): MonthDashboardState {
   const [fetchKey, setFetchKey] = useState(0);
 
   useEffect(() => {
+    if (!isApiConfigured()) {
+      return;
+    }
+
     void fetchFirstWorkoutDate()
       .then(result => setFirstWorkoutDate(result.firstDate))
       .catch(() => {
         // Keep default; month clamp still works with today.
       });
-  }, []);
+
+  }, [fetchKey]);
 
   const monthAnchor = useMemo(
     () => parseMonthPeriod(startOfPeriod),

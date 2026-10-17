@@ -9,5 +9,9 @@ export const colors = {
   accentGreenDim: 'rgba(163, 230, 53, 0.15)',
   accentBlue: '#38bdf8',
   accentBlueDim: 'rgba(56, 189, 248, 0.15)',
+  accentOrange: '#fb923c',
+  accentOrangeDim: 'rgba(251, 146, 60, 0.15)',
+  accentPurple: '#a78bfa',
+  accentPurpleDim: 'rgba(167, 139, 250, 0.15)',
   navButton: '#1a2030',
 };

@@ -11,13 +11,35 @@ import {colors} from '../theme';
 import {
   buildLoadPercentDelta,
 } from '../utils/periodComparison';
-import {countWorkingDaysInMonth, parseMonthPeriod} from '../utils/monthPeriod';
 import {
+  countWorkingDaysInMonth,
+  formatMonthNameOnly,
+  isSelectedMonthCurrent,
+  parseMonthPeriod,
+} from '../utils/monthPeriod';
+import {
+  getMonthStreakPresentation,
+  getStreakPresentation,
+} from '../utils/streakPresentation';
+import {
+  longestStreakInCalendarMonth,
+  longestStreakRangeInCalendarMonth,
+  summarizeStreak,
+} from '../utils/streak';
+import {
+  formatAvgCaloriesPerSession,
   formatAvgMinutesPerSession,
   formatExerciseTimeHhMm,
+  formatGroupedNumber,
   formatTimeDeltaHhMm,
 } from '../utils/statisticsDisplay';
-import {DumbbellIcon, StopwatchIcon} from './DashboardIcons';
+import {
+  DumbbellIcon,
+  FlameIcon,
+  StopwatchIcon,
+  StreakIcon,
+  type StreakIconVariant,
+} from './DashboardIcons';
 import StatCard from './StatCard';
 
 export default function MonthlyDashboardHeader(): React.JSX.Element {
@@ -55,6 +77,76 @@ export default function MonthlyDashboardHeader(): React.JSX.Element {
   const timeValue = loading
     ? '—'
     : formatExerciseTimeHhMm(workouts.statistics.exerciseTime);
+
+  const burnAmount = loading
+    ? '—'
+    : formatGroupedNumber(workouts.statistics.calories);
+
+  const monthAnchor = useMemo(
+    () => parseMonthPeriod(startOfPeriod),
+    [startOfPeriod],
+  );
+  const isCurrentMonth = useMemo(
+    () => isSelectedMonthCurrent(startOfPeriod),
+    [startOfPeriod],
+  );
+  const monthNameOnly = useMemo(
+    () => formatMonthNameOnly(monthAnchor),
+    [monthAnchor],
+  );
+
+  const activeStreakWorkouts = useMemo(() => {
+    if (!isCurrentMonth) {
+      return [];
+    }
+    return [...previousWorkouts.content, ...workouts.content];
+  }, [isCurrentMonth, previousWorkouts.content, workouts.content]);
+
+  const streakSummary = useMemo(
+    () => summarizeStreak(activeStreakWorkouts),
+    [activeStreakWorkouts],
+  );
+
+  const longestMonthStreak = useMemo(
+    () => longestStreakInCalendarMonth(workouts.content, monthAnchor),
+    [workouts.content, monthAnchor],
+  );
+
+  const monthStreakRange = useMemo(
+    () => longestStreakRangeInCalendarMonth(workouts.content, monthAnchor),
+    [workouts.content, monthAnchor],
+  );
+
+  const streakPresentation = useMemo(() => {
+    if (isCurrentMonth) {
+      return getStreakPresentation(streakSummary);
+    }
+    return getMonthStreakPresentation(monthStreakRange, monthNameOnly);
+  }, [isCurrentMonth, streakSummary, monthStreakRange, monthNameOnly]);
+
+  const streakCardTitle = isCurrentMonth
+    ? 'Active Streak'
+    : 'Month Streak';
+
+  const streakDayCount = isCurrentMonth
+    ? streakSummary.current
+    : longestMonthStreak;
+
+  const streakValue = loading
+    ? '—'
+    : `${streakDayCount} Day${streakDayCount === 1 ? '' : 's'}`;
+
+  const streakBadge =
+    !loading && streakPresentation.badgeLabel ? (
+      <View style={styles.bestBadge}>
+        <Text style={styles.bestFlame}>🔥</Text>
+        <Text style={styles.bestLabel}>{streakPresentation.badgeLabel}</Text>
+      </View>
+    ) : undefined;
+
+  const streakIconVariant: StreakIconVariant = loading
+    ? 'idle'
+    : streakPresentation.iconVariant;
 
   return (
     <View style={styles.wrap}>
@@ -117,6 +209,26 @@ export default function MonthlyDashboardHeader(): React.JSX.Element {
           iconTint={colors.accentBlueDim}
         />
       </View>
+
+      <View style={[styles.statsRow, styles.statsRowSecond]}>
+        <StatCard
+          title="Active Burn"
+          value={burnAmount}
+          valueSuffix={loading ? undefined : 'kcal'}
+          footer={loading ? '' : formatAvgCaloriesPerSession(workouts)}
+          icon={<FlameIcon />}
+          iconTint={colors.accentOrangeDim}
+        />
+        <View style={styles.statsGap} />
+        <StatCard
+          title={streakCardTitle}
+          value={streakValue}
+          badge={streakBadge}
+          footer={loading ? '' : streakPresentation.footer}
+          icon={<StreakIcon variant={streakIconVariant} />}
+          iconTint={colors.accentPurpleDim}
+        />
+      </View>
     </View>
   );
 }
@@ -172,8 +284,24 @@ const styles = StyleSheet.create({
   statsRow: {
     flexDirection: 'row',
   },
+  statsRowSecond: {
+    marginTop: 12,
+  },
   statsGap: {
     width: 12,
+  },
+  bestBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  bestFlame: {
+    fontSize: 14,
+  },
+  bestLabel: {
+    color: colors.accentPurple,
+    fontSize: 15,
+    fontWeight: '700',
   },
   error: {
     color: '#f87171',

@@ -4,9 +4,12 @@ import {colors} from '../theme';
 
 type StatCardProps = {
   title: string;
-  value: string;
-  delta: string;
-  deltaColor: string;
+  value?: string;
+  valueSuffix?: string;
+  valueContent?: ReactNode;
+  delta?: string;
+  deltaColor?: string;
+  badge?: ReactNode;
   footer: string;
   icon: ReactNode;
   iconTint: string;
@@ -14,9 +17,12 @@ type StatCardProps = {
 
 export default function StatCard({
   title,
-  value,
+  value = '',
+  valueSuffix,
+  valueContent,
   delta,
-  deltaColor,
+  deltaColor = colors.textMuted,
+  badge,
   footer,
   icon,
   iconTint,
@@ -28,8 +34,24 @@ export default function StatCard({
         <View style={[styles.iconWrap, {backgroundColor: iconTint}]}>{icon}</View>
       </View>
       <View style={styles.valueRow}>
-        <Text style={styles.value}>{value}</Text>
-        <Text style={[styles.delta, {color: deltaColor}]}>{delta}</Text>
+        {valueContent ?? (
+          <View style={styles.valueInline}>
+            <Text
+              style={styles.value}
+              numberOfLines={1}
+              adjustsFontSizeToFit
+              minimumFontScale={0.65}>
+              {value}
+            </Text>
+            {valueSuffix ? (
+              <Text style={styles.valueUnit}>{valueSuffix}</Text>
+            ) : null}
+          </View>
+        )}
+        {badge}
+        {delta ? (
+          <Text style={[styles.delta, {color: deltaColor}]}>{delta}</Text>
+        ) : null}
       </View>
       <Text style={styles.footer}>{footer}</Text>
     </View>
@@ -67,9 +89,22 @@ const styles = StyleSheet.create({
   valueRow: {
     flexDirection: 'row',
     alignItems: 'baseline',
-    flexWrap: 'wrap',
+    flexWrap: 'nowrap',
     gap: 8,
     marginBottom: 8,
+  },
+  valueInline: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    flexShrink: 1,
+    maxWidth: '100%',
+  },
+  valueUnit: {
+    color: colors.textMuted,
+    fontSize: 17,
+    fontWeight: '600',
+    marginLeft: 4,
+    flexShrink: 0,
   },
   value: {
     color: colors.textPrimary,
