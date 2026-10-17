@@ -1,72 +1,118 @@
-import React, {useMemo, useState} from 'react';
-import {Pressable, StyleSheet, Text, View} from 'react-native';
+import React, {useMemo} from 'react';
+import {
+  ActivityIndicator,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
+import {useMonthDashboard} from '../hooks/useMonthDashboard';
 import {colors} from '../theme';
+import {
+  buildLoadPercentDelta,
+} from '../utils/periodComparison';
+import {
+  countActiveTrainingDays,
+  formatAvgMinutesPerSession,
+  formatExerciseTimeHours,
+  formatTimeHoursDelta,
+} from '../utils/statisticsDisplay';
 import {DumbbellIcon, StopwatchIcon} from './DashboardIcons';
 import StatCard from './StatCard';
 
-function formatMonthYear(year: number, month: number): string {
-  return new Date(year, month, 1).toLocaleDateString(undefined, {
-    month: 'long',
-    year: 'numeric',
-  });
-}
-
 export default function MonthlyDashboardHeader(): React.JSX.Element {
-  const [anchor, setAnchor] = useState(() => {
-    const now = new Date();
-    return {year: now.getFullYear(), month: now.getMonth()};
-  });
+  const {
+    monthLabel,
+    workouts,
+    previousWorkouts,
+    loading,
+    error,
+    canGoPrevious,
+    canGoNext,
+    shiftMonth,
+  } = useMonthDashboard();
 
-  const monthLabel = useMemo(
-    () => formatMonthYear(anchor.year, anchor.month),
-    [anchor.year, anchor.month],
+  const activeDays = useMemo(
+    () => countActiveTrainingDays(workouts.content),
+    [workouts.content],
   );
 
-  const shiftMonth = (delta: number) => {
-    setAnchor(prev => {
-      const next = new Date(prev.year, prev.month + delta, 1);
-      return {year: next.getFullYear(), month: next.getMonth()};
-    });
-  };
+  const workoutDelta = useMemo(() => {
+    const pct = buildLoadPercentDelta(workouts, previousWorkouts);
+    return `↑ ${pct}`;
+  }, [workouts, previousWorkouts]);
+
+  const timeDelta = useMemo(() => {
+    const delta = formatTimeHoursDelta(
+      workouts.statistics.exerciseTime,
+      previousWorkouts.statistics.exerciseTime,
+    );
+    return `↑ ${delta}`;
+  }, [workouts, previousWorkouts]);
+
+  const workoutValue = loading ? '—' : String(workouts.totalElements);
+  const timeValue = loading
+    ? '—'
+    : formatExerciseTimeHours(workouts.statistics.exerciseTime);
 
   return (
     <View style={styles.wrap}>
       <View style={styles.monthNav}>
         <Pressable
           accessibilityLabel="Previous month"
+          disabled={!canGoPrevious || loading}
           onPress={() => shiftMonth(-1)}
-          style={({pressed}) => [styles.navBtn, pressed && styles.navBtnPressed]}>
+          style={({pressed}) => [
+            styles.navBtn,
+            (!canGoPrevious || loading) && styles.navBtnDisabled,
+            pressed && canGoPrevious && styles.navBtnPressed,
+          ]}>
           <Text style={styles.navChevron}>‹</Text>
         </Pressable>
         <View style={styles.monthCenter}>
           <Text style={styles.monthTitle}>{monthLabel}</Text>
-          <Text style={styles.monthSubtitle}>22 active training days</Text>
+          <Text style={styles.monthSubtitle}>
+            {loading
+              ? 'Loading…'
+              : `${activeDays} active training day${activeDays === 1 ? '' : 's'}`}
+          </Text>
         </View>
         <Pressable
           accessibilityLabel="Next month"
+          disabled={!canGoNext || loading}
           onPress={() => shiftMonth(1)}
-          style={({pressed}) => [styles.navBtn, pressed && styles.navBtnPressed]}>
+          style={({pressed}) => [
+            styles.navBtn,
+            (!canGoNext || loading) && styles.navBtnDisabled,
+            pressed && canGoNext && styles.navBtnPressed,
+          ]}>
           <Text style={styles.navChevron}>›</Text>
         </Pressable>
       </View>
 
+      {error ? <Text style={styles.error}>{error}</Text> : null}
+
+      {loading ? (
+        <ActivityIndicator color={colors.accentBlue} style={styles.spinner} />
+      ) : null}
+
       <View style={styles.statsRow}>
         <StatCard
           title="Total Workouts"
-          value="26"
-          delta="↑ +14%"
+          value={workoutValue}
+          delta={loading ? '—' : workoutDelta}
           deltaColor={colors.accentGreen}
-          footer="Goal: 24 / month"
+          footer={loading ? '' : `${workouts.statistics.calories} kcal`}
           icon={<DumbbellIcon />}
           iconTint={colors.accentGreenDim}
         />
         <View style={styles.statsGap} />
         <StatCard
           title="Total Time"
-          value="31.5h"
-          delta="↑ +2.2h"
+          value={timeValue}
+          delta={loading ? '—' : timeDelta}
           deltaColor={colors.accentBlue}
-          footer="Avg ~72 min / session"
+          footer={loading ? '' : formatAvgMinutesPerSession(workouts)}
           icon={<StopwatchIcon />}
           iconTint={colors.accentBlueDim}
         />
@@ -94,6 +140,9 @@ const styles = StyleSheet.create({
     backgroundColor: colors.navButton,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  navBtnDisabled: {
+    opacity: 0.35,
   },
   navBtnPressed: {
     opacity: 0.75,
@@ -125,5 +174,14 @@ const styles = StyleSheet.create({
   },
   statsGap: {
     width: 12,
+  },
+  error: {
+    color: '#f87171',
+    textAlign: 'center',
+    marginBottom: 12,
+    fontSize: 14,
+  },
+  spinner: {
+    marginBottom: 12,
   },
 });

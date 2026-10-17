@@ -8,6 +8,14 @@ Hello-world React Native app for the Workout project. Layout and tooling match [
 - JDK 21
 - Android SDK — set `sdk.dir` in `android/local.properties` (copy from heating or Android Studio)
 
+## API (Vercel)
+
+The app loads month data the same way as `fe` (`POST /api/workouts` with `timePeriod: "MONTH"`, `GET /api/first_workout_date`).
+
+Set your deployment URL in `src/config/api.ts` (`API_BASE_URL`) — **site root only**, no `/api` suffix (e.g. `https://workout-delta-livid.vercel.app`). Paths like `/api/workouts` are appended in code, same as the web app.
+
+For a **local** API from the Android emulator: `http://10.0.2.2:8081` (with `npm run dev:be` on the host).
+
 ## Run on Android
 
 ```bash
