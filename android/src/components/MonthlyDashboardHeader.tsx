@@ -11,17 +11,18 @@ import {colors} from '../theme';
 import {
   buildLoadPercentDelta,
 } from '../utils/periodComparison';
+import {countWorkingDaysInMonth, parseMonthPeriod} from '../utils/monthPeriod';
 import {
-  countActiveTrainingDays,
   formatAvgMinutesPerSession,
-  formatExerciseTimeHours,
-  formatTimeHoursDelta,
+  formatExerciseTimeHhMm,
+  formatTimeDeltaHhMm,
 } from '../utils/statisticsDisplay';
 import {DumbbellIcon, StopwatchIcon} from './DashboardIcons';
 import StatCard from './StatCard';
 
 export default function MonthlyDashboardHeader(): React.JSX.Element {
   const {
+    startOfPeriod,
     monthLabel,
     workouts,
     previousWorkouts,
@@ -32,9 +33,9 @@ export default function MonthlyDashboardHeader(): React.JSX.Element {
     shiftMonth,
   } = useMonthDashboard();
 
-  const activeDays = useMemo(
-    () => countActiveTrainingDays(workouts.content),
-    [workouts.content],
+  const workingDaysInMonth = useMemo(
+    () => countWorkingDaysInMonth(parseMonthPeriod(startOfPeriod)),
+    [startOfPeriod],
   );
 
   const workoutDelta = useMemo(() => {
@@ -43,7 +44,7 @@ export default function MonthlyDashboardHeader(): React.JSX.Element {
   }, [workouts, previousWorkouts]);
 
   const timeDelta = useMemo(() => {
-    const delta = formatTimeHoursDelta(
+    const delta = formatTimeDeltaHhMm(
       workouts.statistics.exerciseTime,
       previousWorkouts.statistics.exerciseTime,
     );
@@ -53,7 +54,7 @@ export default function MonthlyDashboardHeader(): React.JSX.Element {
   const workoutValue = loading ? '—' : String(workouts.totalElements);
   const timeValue = loading
     ? '—'
-    : formatExerciseTimeHours(workouts.statistics.exerciseTime);
+    : formatExerciseTimeHhMm(workouts.statistics.exerciseTime);
 
   return (
     <View style={styles.wrap}>
@@ -72,9 +73,8 @@ export default function MonthlyDashboardHeader(): React.JSX.Element {
         <View style={styles.monthCenter}>
           <Text style={styles.monthTitle}>{monthLabel}</Text>
           <Text style={styles.monthSubtitle}>
-            {loading
-              ? 'Loading…'
-              : `${activeDays} active training day${activeDays === 1 ? '' : 's'}`}
+            {workingDaysInMonth} working day
+            {workingDaysInMonth === 1 ? '' : 's'} in month
           </Text>
         </View>
         <Pressable
@@ -102,7 +102,7 @@ export default function MonthlyDashboardHeader(): React.JSX.Element {
           value={workoutValue}
           delta={loading ? '—' : workoutDelta}
           deltaColor={colors.accentGreen}
-          footer={loading ? '' : `${workouts.statistics.calories} kcal`}
+          footer="Goal: 24 / month"
           icon={<DumbbellIcon />}
           iconTint={colors.accentGreenDim}
         />

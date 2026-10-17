@@ -1,4 +1,4 @@
-import type {WorkoutData, WorkoutType} from '../types/workout';
+import type {WorkoutData} from '../types/workout';
 
 export function parseExerciseTimeToMinutes(exerciseTime: string): number {
   const parts = exerciseTime.split(':').map(part => Number(part));
@@ -7,36 +7,37 @@ export function parseExerciseTimeToMinutes(exerciseTime: string): number {
   return hours * 60 + minutes;
 }
 
-export function formatExerciseTimeHours(exerciseTime: string): string {
-  const totalMinutes = parseExerciseTimeToMinutes(exerciseTime);
-  const hours = totalMinutes / 60;
-  const rounded = Math.round(hours * 10) / 10;
-  return `${rounded}h`;
+/** API `statistics.exerciseTime` is `HH:MM:00` — show as `hh:mm`. */
+export function formatExerciseTimeHhMm(exerciseTime: string): string {
+  const parts = exerciseTime.split(':');
+  const hours = Number(parts[0] ?? 0);
+  const minutes = Number(parts[1] ?? 0);
+  if (!Number.isFinite(hours) || !Number.isFinite(minutes)) {
+    return '00:00';
+  }
+  return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
 }
 
-export function formatTimeHoursDelta(
+export function formatMinutesAsHhMm(totalMinutes: number): string {
+  const abs = Math.abs(Math.round(totalMinutes));
+  const hours = Math.floor(abs / 60);
+  const minutes = abs % 60;
+  return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+}
+
+export function formatTimeDeltaHhMm(
   currentTime: string,
   previousTime: string,
 ): string {
-  const currentHours =
-    parseExerciseTimeToMinutes(currentTime) / 60;
-  const previousHours =
-    parseExerciseTimeToMinutes(previousTime) / 60;
-  const diff = Math.round((currentHours - previousHours) * 10) / 10;
-  const sign = diff > 0 ? '+' : '';
-  return `${sign}${diff}h`;
-}
-
-export function countActiveTrainingDays(workouts: WorkoutType[]): number {
-  const days = new Set<string>();
-  for (const workout of workouts) {
-    const raw = String(workout.date ?? '');
-    const day = raw.length >= 10 ? raw.slice(0, 10) : raw;
-    if (day) {
-      days.add(day);
-    }
+  const diff =
+    parseExerciseTimeToMinutes(currentTime)
+    - parseExerciseTimeToMinutes(previousTime);
+  const rounded = Math.round(diff);
+  if (rounded === 0) {
+    return '+00:00';
   }
-  return days.size;
+  const sign = rounded > 0 ? '+' : '-';
+  return `${sign}${formatMinutesAsHhMm(rounded)}`;
 }
 
 export function formatAvgMinutesPerSession(data: WorkoutData): string {
@@ -46,6 +47,6 @@ export function formatAvgMinutesPerSession(data: WorkoutData): string {
   const totalMinutes = parseExerciseTimeToMinutes(
     data.statistics.exerciseTime,
   );
-  const avg = Math.round(totalMinutes / data.totalElements);
-  return `Avg ~${avg} min / session`;
+  const avgMinutes = Math.round(totalMinutes / data.totalElements);
+  return `Avg ~${formatMinutesAsHhMm(avgMinutes)} / session`;
 }

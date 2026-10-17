@@ -52,6 +52,21 @@ export function monthStart(date: Date): Date {
   return new Date(date.getFullYear(), date.getMonth(), 1);
 }
 
+/** Weekdays (Mon–Fri) in the calendar month of `anchor`. */
+export function countWorkingDaysInMonth(anchor: Date): number {
+  const year = anchor.getFullYear();
+  const month = anchor.getMonth();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  let count = 0;
+  for (let day = 1; day <= daysInMonth; day++) {
+    const weekday = new Date(year, month, day).getDay();
+    if (weekday !== 0 && weekday !== 6) {
+      count++;
+    }
+  }
+  return count;
+}
+
 export function isMonthInRange(
   month: Date,
   firstWorkoutIso: string,
