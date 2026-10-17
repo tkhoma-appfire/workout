@@ -14,4 +14,11 @@ export const colors = {
   accentPurple: '#a78bfa',
   accentPurpleDim: 'rgba(167, 139, 250, 0.15)',
   navButton: '#1a2030',
+  heatmapRest: '#252b36',
+  heatmapLight: '#3f4f2e',
+  heatmapModerate: '#5f7a2e',
+  heatmapHeavy: '#a3e635',
+  heatmapRestText: '#64748b',
+  heatmapActiveText: '#e2e8f0',
+  heatmapHeavyText: '#0f172a',
 };

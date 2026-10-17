@@ -74,6 +74,15 @@ export function formatTimeDeltaHhMm(
   return `${sign}${formatMinutesAsHhMm(rounded)}`;
 }
 
+export function formatMinutesAsMmSs(totalMinutes: number): string {
+  const rounded = Math.max(0, totalMinutes);
+  const minutes = Math.floor(rounded);
+  const seconds = Math.round((rounded - minutes) * 60);
+  const normalizedMinutes = seconds === 60 ? minutes + 1 : minutes;
+  const normalizedSeconds = seconds === 60 ? 0 : seconds;
+  return `${normalizedMinutes}:${String(normalizedSeconds).padStart(2, '0')}`;
+}
+
 export function formatAvgMinutesPerSession(data: WorkoutData): string {
   if (data.totalElements === 0) {
     return 'No sessions this month';
@@ -81,6 +90,6 @@ export function formatAvgMinutesPerSession(data: WorkoutData): string {
   const totalMinutes = parseExerciseTimeToMinutes(
     data.statistics.exerciseTime,
   );
-  const avgMinutes = Math.round(totalMinutes / data.totalElements);
-  return `Avg ~${formatMinutesAsHhMm(avgMinutes)} / session`;
+  const avgMinutes = totalMinutes / data.totalElements;
+  return `Avg ~${formatMinutesAsMmSs(avgMinutes)} / session`;
 }

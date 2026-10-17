@@ -14,7 +14,6 @@ function App(): React.JSX.Element {
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}>
           <MonthlyDashboardHeader />
-          <View style={styles.bodyPlaceholder} />
         </ScrollView>
       </SafeAreaView>
     </SafeAreaProvider>
@@ -31,10 +30,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
-  },
-  bodyPlaceholder: {
-    flex: 1,
-    minHeight: 120,
+    paddingBottom: 24,
   },
 });
 

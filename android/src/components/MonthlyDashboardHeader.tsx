@@ -40,6 +40,7 @@ import {
   StreakIcon,
   type StreakIconVariant,
 } from './DashboardIcons';
+import MonthlyConsistencyHeatmap from './MonthlyConsistencyHeatmap';
 import StatCard from './StatCard';
 
 export default function MonthlyDashboardHeader(): React.JSX.Element {
@@ -229,6 +230,12 @@ export default function MonthlyDashboardHeader(): React.JSX.Element {
           iconTint={colors.accentPurpleDim}
         />
       </View>
+
+      <MonthlyConsistencyHeatmap
+        workouts={workouts.content}
+        monthAnchor={monthAnchor}
+        loading={loading}
+      />
     </View>
   );
 }
