@@ -1,0 +1,2 @@
+ALTER TABLE workout
+  ADD COLUMN IF NOT EXISTS workout_time VARCHAR(10);

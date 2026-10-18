@@ -7,6 +7,7 @@ export type WorkoutWriteExercise = {
 export type WorkoutWritePayload = {
   id?: string;
   date: string;
+  workoutTime: string;
   time: number;
   calories: number;
   puls: number;

@@ -22,6 +22,7 @@ export type NewWorkoutFormData = {
 
 // basic info
   date: string;
+  workoutTime: string;
   rounds: string;
   comment: string;
 };
@@ -34,6 +35,7 @@ export type WorkoutType = {
   }[];
   id: any;
   date: any;
+  workoutTime?: string;
   xaxisLabel: string;
   time: any;
   rounds: any;

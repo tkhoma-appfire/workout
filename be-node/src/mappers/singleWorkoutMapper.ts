@@ -34,6 +34,7 @@ function mapWorkoutProjections(projections: WorkoutFullRow[]): SingleWorkoutMode
   const model: SingleWorkoutModel = {
     id: first.id,
     date,
+    workoutTime: first.workout_time,
     time: first.exercise_time,
     calories: first.calories,
     puls: first.puls,

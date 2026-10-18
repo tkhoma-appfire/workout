@@ -6,6 +6,7 @@ import type { WorkoutWriteExercise, WorkoutWritePayload } from "../types/workout
 const WORKOUT_BY_DATE_SELECT = `
   SELECT w.id,
     w.date,
+    w.workout_time,
     w.exercise_time,
     w.calories,
     w.puls,
@@ -102,6 +103,7 @@ export async function insertWorkout(
     `
       INSERT INTO workout (
         date,
+        workout_time,
         exercise_time,
         calories,
         puls,
@@ -112,11 +114,12 @@ export async function insertWorkout(
         tl,
         rounds,
         comment
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
       RETURNING id
     `,
     [
       payload.date,
+      payload.workoutTime,
       payload.time,
       payload.calories,
       payload.puls,
@@ -149,21 +152,23 @@ export async function updateWorkout(
     `
       UPDATE workout
       SET date = $2,
-        exercise_time = $3,
-        calories = $4,
-        puls = $5,
-        puls_max = $6,
-        intensive = $7,
-        aero = $8,
-        anaero = $9,
-        tl = $10,
-        rounds = $11,
-        comment = $12
+        workout_time = $3,
+        exercise_time = $4,
+        calories = $5,
+        puls = $6,
+        puls_max = $7,
+        intensive = $8,
+        aero = $9,
+        anaero = $10,
+        tl = $11,
+        rounds = $12,
+        comment = $13
       WHERE id = $1
     `,
     [
       workoutId,
       payload.date,
+      payload.workoutTime,
       payload.time,
       payload.calories,
       payload.puls,

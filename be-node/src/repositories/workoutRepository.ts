@@ -4,6 +4,7 @@ import type { DateRange, WorkoutFullRow } from "../types/workout.js";
 const WORKOUT_SELECT = `
   SELECT w.id,
     w.date,
+    w.workout_time,
     w.exercise_time,
     w.calories,
     w.puls,
@@ -143,6 +144,7 @@ export async function findWorkoutsByIds(
 const EXPORT_WORKOUT_SELECT = `
   SELECT w.id,
     w.date,
+    w.workout_time,
     w.exercise_time,
     w.calories,
     w.puls,

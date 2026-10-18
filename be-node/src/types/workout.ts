@@ -14,6 +14,7 @@ export type ExerciseModel = {
 export type SingleWorkoutModel = {
   id: string;
   date: string;
+  workoutTime: string | null;
   time: number;
   calories: number | null;
   puls: number | null;
@@ -52,6 +53,7 @@ export type WorkoutsResponse<T> = {
 export type WorkoutFullRow = {
   id: string;
   date: Date;
+  workout_time: string | null;
   exercise_time: number;
   calories: number | null;
   puls: number | null;

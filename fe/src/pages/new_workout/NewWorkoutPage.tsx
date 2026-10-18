@@ -7,9 +7,11 @@ import StepBasicInfo from "./StepBasicInfo";
 import type { ExerciseNameOption, NewWorkoutFormData } from "../../types";
 import { format, isValid } from 'date-fns'
 import { addWorkout, fetchWorkoutTemplate } from "@/utils/http";
-import { createDefaultRounds, isValidRounds } from "@/utils/rounds";
+import { createDefaultRounds } from "@/utils/rounds";
 import { CalendarContext } from "@/context/CalendarContextProvider";
 import { CurrentPeriodContext } from "@/context/CurrentPeriodContextProvider";
+import WorkoutDateAndTimeFields from "@/components/workout/WorkoutDateAndTimeFields";
+import { validateWorkoutStep, validationWarningForStep } from "@/utils/workoutForm";
 const steps = ["Workout Metrics", "Exercises", "Basic Info"];
 
 const todayLocal = () => format(new Date(), "yyyy-MM-dd");
@@ -33,6 +35,7 @@ const NewWorkoutPage = () => {
     trainingLoad: 0,
     exercises: [],
     date: currentDate,
+    workoutTime: "",
     rounds: createDefaultRounds(),
     comment: "",
   }));
@@ -47,43 +50,8 @@ const NewWorkoutPage = () => {
     setFormData((prev) => ({ ...prev, [key]: value }));
   };
 
-  const validateStep = () => {
-    if (currentStep === 0) {
-      return (
-        formData.time > 0
-        && formData.calories > 0
-        && formData.puls > 0
-        && formData.maxPuls > 0
-        && formData.intensive.trim() !== ""
-        && formData.aero.trim() !== ""
-        && formData.anaero.trim() !== ""
-        && formData.trainingLoad >= 0
-      );
-    }
-    if (currentStep === 1) {
-      return formData.exercises.length > 0 && formData.exercises.every((e) => e.exercise.trim() !== "" && e.weight >= 0);
-    }
-    if (currentStep === 2) {
-      return formData.date.trim() !== "" && isValidRounds(formData.rounds) && formData.comment.trim() !== "";
-    }
-    return true;
-  };
-
-  const validationWarningForStep = (step: number) => {
-    switch (step) {
-      case 0:
-        return "Enter workout metrics: positive time, calories, pulses, all intensity fields, and training load.";
-      case 1:
-        return "Complete the exercises step before continuing.";
-      case 2:
-        return "Fill in required basic info before submitting.";
-      default:
-        return "Please complete this step before continuing.";
-    }
-  };
-
   const goNext = () => {
-    if (!validateStep()) {
+    if (!validateWorkoutStep(currentStep, formData)) {
       message.warning(validationWarningForStep(currentStep));
       return;
     }
@@ -93,7 +61,7 @@ const NewWorkoutPage = () => {
   const goBack = () => setCurrentStep((prev) => Math.max(prev - 1, 0));
 
   const handleSubmit = () => {
-    if (!validateStep()) {
+    if (!validateWorkoutStep(currentStep, formData)) {
       message.warning(validationWarningForStep(currentStep));
       return;
     }
@@ -180,27 +148,14 @@ const NewWorkoutPage = () => {
       </div>
 
       <div className="mt-6 shrink-0 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-        <div className="text-sm text-slate-600 grid grid-cols-2 gap-4 px-16">
-          <label className="flex flex-col gap-2 w-[80%]">
-            <span className="text-sm font-medium text-slate-700">Workout Date</span>
-            <input
-              type="date"
-              value={formData.date}
-              onChange={(e) => updateField("date", e.target.value)}
-              className="rounded-md border border-slate-300 px-3 py-2 outline-none focus:border-sky-500"
-            />
-          </label>
-          <label className="flex flex-col gap-2 w-[80%]">
-              <span className="text-sm font-medium text-slate-700">Template Workout Date</span>
-              <input
-              type="date"
-              value={templateDate}
-              onChange={handleTemplateDateChange}
-              onBlur={handleTemplateDateBlur}
-              className="rounded-md border border-slate-300 px-3 py-2 outline-none focus:border-sky-500"
-              />
-          </label>
-        </div>
+        <WorkoutDateAndTimeFields
+          formData={formData}
+          updateField={updateField}
+          showTemplateDate
+          templateDate={templateDate}
+          onTemplateDateChange={handleTemplateDateChange}
+          onTemplateDateBlur={handleTemplateDateBlur}
+        />
       </div>
 
       <div

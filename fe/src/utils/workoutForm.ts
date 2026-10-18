@@ -1,5 +1,6 @@
 import type { NewWorkoutFormData, WorkoutType } from "@/types";
 import { createDefaultRounds, isValidRounds } from "@/utils/rounds";
+import { isValidMmSs, normalizeMmSs } from "@/utils/timeFormat";
 
 type WorkoutLike = Partial<WorkoutType> & {
   payload?: Partial<WorkoutType>;
@@ -16,6 +17,7 @@ const emptyFormData = (): NewWorkoutFormData => ({
   trainingLoad: 0,
   exercises: [],
   date: "",
+  workoutTime: "",
   rounds: createDefaultRounds(),
   comment: "",
 });
@@ -77,6 +79,7 @@ export function workoutToFormData(workout: WorkoutType | null): NewWorkoutFormDa
     trainingLoad: Number(workout.trainingLoad ?? 0),
     exercises,
     date: String(workout.date ?? ""),
+    workoutTime: normalizeMmSs(workout.workoutTime) ?? "",
     rounds: workout.rounds ?? "",
     comment: workout.comment ?? "",
   };
@@ -111,6 +114,7 @@ export function validateWorkoutStep(
   if (step === 2) {
     return (
       formData.date.trim() !== ""
+      && isValidMmSs(formData.workoutTime)
       && isValidRounds(formData.rounds)
       && formData.comment.trim() !== ""
     );
@@ -126,7 +130,7 @@ export function validationWarningForStep(step: number): string {
     case 1:
       return "Complete the exercises step before continuing.";
     case 2:
-      return "Fill in required basic info before saving.";
+      return "Fill in date, workout time (mm:ss), rounds, and comment before saving.";
     default:
       return "Please complete this step before continuing.";
   }

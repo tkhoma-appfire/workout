@@ -7,6 +7,7 @@ import type { ExerciseNameOption, NewWorkoutFormData, WorkoutType } from "@/type
 import { CalendarContext } from "@/context/CalendarContextProvider";
 import { CurrentPeriodContext } from "@/context/CurrentPeriodContextProvider";
 import { apiUrl, editWorkout } from "@/utils/http";
+import WorkoutDateAndTimeFields from "@/components/workout/WorkoutDateAndTimeFields";
 import {
   validateWorkoutStep,
   validationWarningForStep,
@@ -196,6 +197,10 @@ const EditWorkoutDialog = ({ open, workout, onClose, onSaved }: EditWorkoutDialo
             </div>
           );
         })}
+      </div>
+
+      <div className="mt-6 rounded-xl border border-slate-200 bg-white p-6">
+        <WorkoutDateAndTimeFields formData={formData} updateField={updateField} />
       </div>
 
       <div

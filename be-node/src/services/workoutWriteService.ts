@@ -10,8 +10,16 @@ import {
 } from "../repositories/workoutWriteRepository.js";
 import type { SingleWorkoutModel } from "../types/workout.js";
 import type { WorkoutWritePayload } from "../types/workoutWrite.js";
+import { normalizeWorkoutTime } from "../util/mmSs.js";
+
+function assertValidWorkoutTime(payload: WorkoutWritePayload): void {
+  if (!normalizeWorkoutTime(payload.workoutTime)) {
+    throw new Error("Invalid workoutTime: expected mm:ss");
+  }
+}
 
 export async function addWorkout(pool: Pool, payload: WorkoutWritePayload): Promise<void> {
+  assertValidWorkoutTime(payload);
   const client = await pool.connect();
 
   try {
@@ -32,6 +40,7 @@ export async function addWorkout(pool: Pool, payload: WorkoutWritePayload): Prom
 }
 
 export async function editWorkout(pool: Pool, payload: WorkoutWritePayload): Promise<void> {
+  assertValidWorkoutTime(payload);
   if (!payload.id) {
     throw new WorkoutNotFoundError();
   }

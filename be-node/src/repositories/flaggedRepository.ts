@@ -32,6 +32,7 @@ export async function findFlaggedWorkouts(pool: Pool): Promise<WorkoutFullRow[]>
     `
       SELECT w.id,
         w.date,
+        w.workout_time,
         w.exercise_time,
         w.calories,
         w.puls,
