@@ -41,6 +41,16 @@ Icons are generated from `assets/app-logo.jpeg`:
 
 Requires ImageMagick (`magick`). Adaptive icon background matches the photo (`#525657` in `res/values/colors.xml`).
 
+## Splash screen
+
+Startup uses a **separate** oval splash (`drawable-nodpi/splash_icon.png`), not the launcher mipmaps. The app logo is stretched to fill the oval, centered on screen:
+
+```bash
+./scripts/generate-splash.sh
+```
+
+`AppTheme` uses `@drawable/launch_screen`. Regenerate after changing `assets/app-logo.jpeg`.
+
 ## App entry
 
 - `App.tsx` — “Workout / Hello, world!”

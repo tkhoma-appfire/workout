@@ -1,20 +1,26 @@
-import React from 'react';
-import {ScrollView, StatusBar, StyleSheet, View} from 'react-native';
+import React, {useState} from 'react';
+import {StatusBar, StyleSheet, View} from 'react-native';
 import {SafeAreaProvider, SafeAreaView} from 'react-native-safe-area-context';
-import MonthlyDashboardHeader from './src/components/MonthlyDashboardHeader';
+import AppTabBar, {type AppTab} from './src/components/AppTabBar';
+import FavoritesScreen from './src/screens/FavoritesScreen';
+import MonthOverviewScreen from './src/screens/MonthOverviewScreen';
 import {colors} from './src/theme';
 
 function App(): React.JSX.Element {
+  const [activeTab, setActiveTab] = useState<AppTab>('month');
+
   return (
     <SafeAreaProvider>
       <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
         <StatusBar barStyle="light-content" backgroundColor={colors.screen} />
-        <ScrollView
-          style={styles.scroll}
-          contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={false}>
-          <MonthlyDashboardHeader />
-        </ScrollView>
+        <View style={styles.body}>
+          {activeTab === 'month' ? (
+            <MonthOverviewScreen />
+          ) : (
+            <FavoritesScreen />
+          )}
+        </View>
+        <AppTabBar activeTab={activeTab} onChange={setActiveTab} />
       </SafeAreaView>
     </SafeAreaProvider>
   );
@@ -25,12 +31,8 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.screen,
   },
-  scroll: {
+  body: {
     flex: 1,
-  },
-  scrollContent: {
-    flexGrow: 1,
-    paddingBottom: 24,
   },
 });
 

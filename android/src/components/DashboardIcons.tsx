@@ -81,6 +81,15 @@ export function StopwatchIcon(): React.JSX.Element {
   );
 }
 
+export function RepeatIcon(): React.JSX.Element {
+  return (
+    <View style={styles.repeat}>
+      <View style={[styles.repeatRing, {borderColor: colors.accentPurple}]} />
+      <View style={[styles.repeatDot, {backgroundColor: colors.accentPurple}]} />
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
   dumbbell: {
     flexDirection: 'row',
@@ -201,5 +210,25 @@ const styles = StyleSheet.create({
     height: 8,
     borderRadius: 2,
     transform: [{rotate: '45deg'}],
+  },
+  repeat: {
+    width: 16,
+    height: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  repeatRing: {
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    borderWidth: 2,
+  },
+  repeatDot: {
+    position: 'absolute',
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+    right: 0,
+    top: 1,
   },
 });

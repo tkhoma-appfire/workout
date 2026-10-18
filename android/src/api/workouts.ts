@@ -1,4 +1,8 @@
-import type {FirstWorkoutDateResponse, WorkoutData} from '../types/workout';
+import type {
+  FirstWorkoutDateResponse,
+  WorkoutData,
+  WorkoutType,
+} from '../types/workout';
 import {apiUrl} from './http';
 
 export async function fetchFirstWorkoutDate(): Promise<FirstWorkoutDateResponse> {
@@ -31,6 +35,19 @@ export async function loadMonthWorkouts(
   }
 
   return response.json() as Promise<WorkoutData>;
+}
+
+export async function fetchFavorites(): Promise<WorkoutType[]> {
+  const response = await fetch(apiUrl('/api/favorites'), {
+    method: 'GET',
+    headers: {'Content-Type': 'application/json'},
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to load favorite workouts');
+  }
+
+  return response.json() as Promise<WorkoutType[]>;
 }
 
 export async function loadWeekWorkouts(

@@ -12,6 +12,7 @@ export type WorkoutType = {
   comment: unknown;
   calories?: number;
   trainingLoad?: number;
+  favorite?: boolean;
 };
 
 export type WorkoutData = {
