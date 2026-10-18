@@ -43,7 +43,7 @@ Requires ImageMagick (`magick`). Adaptive icon background matches the photo (`#5
 
 ## Splash screen
 
-Startup uses a **separate** oval splash (`drawable-nodpi/splash_icon.png`), not the launcher mipmaps. The app logo is stretched to fill the oval, centered on screen:
+Startup uses a **separate** splash icon (`drawable-nodpi/splash_icon.png`), not the launcher mipmaps. The logo keeps its original aspect ratio with rounded corners, centered on screen:
 
 ```bash
 ./scripts/generate-splash.sh
