@@ -1,5 +1,5 @@
 import type { NewWorkoutFormData } from "@/types";
-import { formatMmSsInput, isAllowedMmSsInput } from "@/utils/timeFormat";
+import { formatHhMmInput, isAllowedHhMmInput } from "@/utils/timeFormat";
 
 type WorkoutDateAndTimeFieldsProps = {
   formData: NewWorkoutFormData;
@@ -22,8 +22,8 @@ const WorkoutDateAndTimeFields = ({
   onTemplateDateBlur,
 }: WorkoutDateAndTimeFieldsProps) => {
   const handleWorkoutTimeChange = (value: string) => {
-    if (isAllowedMmSsInput(value)) {
-      updateField("workoutTime", formatMmSsInput(value));
+    if (isAllowedHhMmInput(value)) {
+      updateField("workoutTime", formatHhMmInput(value));
     }
   };
 
@@ -43,7 +43,7 @@ const WorkoutDateAndTimeFields = ({
         <input
           type="text"
           inputMode="numeric"
-          placeholder="mm:ss"
+          placeholder="hh:mm"
           value={formData.workoutTime}
           onChange={(e) => handleWorkoutTimeChange(e.target.value)}
           className="rounded-md border border-slate-300 px-3 py-2 outline-none focus:border-sky-500"

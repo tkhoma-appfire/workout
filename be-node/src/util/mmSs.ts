@@ -1,12 +1,19 @@
-export function isValidMmSs(value: string): boolean {
-  const match = value.trim().match(/^(\d+):(\d{2})$/);
+/** Workout clock time `hh:mm` (24h, minutes 00–59). */
+export function isValidWorkoutTimeHhMm(value: string): boolean {
+  const match = value.trim().match(/^(\d{1,2}):(\d{2})$/);
   if (!match) {
     return false;
   }
 
-  const minutes = Number(match[1]);
-  const seconds = Number(match[2]);
-  return seconds >= 0 && seconds < 60 && (minutes > 0 || seconds > 0);
+  const hours = Number(match[1]);
+  const minutes = Number(match[2]);
+  return (
+    hours >= 0
+    && hours <= 23
+    && minutes >= 0
+    && minutes < 60
+    && (hours > 0 || minutes > 0)
+  );
 }
 
 export function normalizeWorkoutTime(value: unknown): string | null {
@@ -15,27 +22,25 @@ export function normalizeWorkoutTime(value: unknown): string | null {
   }
 
   const trimmed = value.trim();
-  return isValidMmSs(trimmed) ? trimmed : null;
+  return isValidWorkoutTimeHhMm(trimmed) ? trimmed : null;
 }
 
-const FIVE_MINUTES_SECONDS = 5 * 60;
-
-/** Nearest 5-minute mark (seconds always :00), e.g. 17:03 → 15:00, 18:02 → 20:00. */
+/** Nearest 5-minute clock mark, e.g. 16:07 → 16:05, 16:08 → 16:10. */
 export function roundWorkoutTimeToFiveMinutes(value: string): string {
-  const match = value.trim().match(/^(\d+):(\d{2})$/);
+  const match = value.trim().match(/^(\d{1,2}):(\d{2})$/);
   if (!match) {
     throw new Error("Invalid workoutTime");
   }
 
-  const totalSeconds = Number(match[1]) * 60 + Number(match[2]);
-  let roundedSeconds = Math.round(totalSeconds / FIVE_MINUTES_SECONDS)
-    * FIVE_MINUTES_SECONDS;
+  const hours = Number(match[1]);
+  const minutes = Number(match[2]);
+  const totalMinutes = hours * 60 + minutes;
+  const rounded = Math.min(
+    Math.round(totalMinutes / 5) * 5,
+    23 * 60 + 55,
+  );
+  const roundedHours = Math.floor(rounded / 60);
+  const roundedMinutes = rounded % 60;
 
-  if (roundedSeconds === 0 && totalSeconds > 0) {
-    roundedSeconds = FIVE_MINUTES_SECONDS;
-  }
-
-  const minutes = Math.floor(roundedSeconds / 60);
-  const seconds = roundedSeconds % 60;
-  return `${minutes}:${String(seconds).padStart(2, "0")}`;
+  return `${roundedHours}:${String(roundedMinutes).padStart(2, "0")}`;
 }

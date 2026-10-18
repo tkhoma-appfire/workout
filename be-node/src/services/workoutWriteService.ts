@@ -17,7 +17,7 @@ import {
 
 function assertValidWorkoutTime(payload: WorkoutWritePayload): void {
   if (!normalizeWorkoutTime(payload.workoutTime)) {
-    throw new Error("Invalid workoutTime: expected mm:ss");
+    throw new Error("Invalid workoutTime: expected hh:mm");
   }
 }
 
