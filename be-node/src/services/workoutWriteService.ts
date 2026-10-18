@@ -10,7 +10,10 @@ import {
 } from "../repositories/workoutWriteRepository.js";
 import type { SingleWorkoutModel } from "../types/workout.js";
 import type { WorkoutWritePayload } from "../types/workoutWrite.js";
-import { normalizeWorkoutTime } from "../util/mmSs.js";
+import {
+  normalizeWorkoutTime,
+  roundWorkoutTimeToFiveMinutes,
+} from "../util/mmSs.js";
 
 function assertValidWorkoutTime(payload: WorkoutWritePayload): void {
   if (!normalizeWorkoutTime(payload.workoutTime)) {
@@ -18,8 +21,13 @@ function assertValidWorkoutTime(payload: WorkoutWritePayload): void {
   }
 }
 
-export async function addWorkout(pool: Pool, payload: WorkoutWritePayload): Promise<void> {
+function applyWorkoutTimeRoundingOnCreate(payload: WorkoutWritePayload): void {
   assertValidWorkoutTime(payload);
+  payload.workoutTime = roundWorkoutTimeToFiveMinutes(payload.workoutTime);
+}
+
+export async function addWorkout(pool: Pool, payload: WorkoutWritePayload): Promise<void> {
+  applyWorkoutTimeRoundingOnCreate(payload);
   const client = await pool.connect();
 
   try {
