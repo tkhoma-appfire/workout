@@ -4,9 +4,16 @@ import type {WorkoutType} from '../types/workout';
 import {colors} from '../theme';
 import {
   buildMonthHeatmap,
+  type HeatmapDay,
   type HeatmapIntensity,
   mondayOffsetForMonth,
 } from '../utils/heatmapIntensity';
+
+function localIsoDate(date: Date): string {
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${date.getFullYear()}-${month}-${day}`;
+}
 
 const WEEKDAYS = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
 
@@ -39,6 +46,8 @@ export default function MonthlyConsistencyHeatmap({
     () => buildMonthHeatmap(workouts, monthAnchor),
     [workouts, monthAnchor],
   );
+
+  const todayIso = localIsoDate(new Date());
 
   const leadingBlanks = useMemo(
     () => mondayOffsetForMonth(monthAnchor),
@@ -85,12 +94,18 @@ export default function MonthlyConsistencyHeatmap({
 
           const bg = INTENSITY_COLORS[cell.intensity];
           const textColor = INTENSITY_TEXT[cell.intensity];
+          const isToday = cell.iso === todayIso;
 
           return (
             <Pressable
               key={cell.iso}
-              accessibilityLabel={`Day ${cell.day}, training load ${cell.trainingLoad}`}
-              style={[styles.cell, styles.dayCell, {backgroundColor: bg}]}
+              accessibilityLabel={`Day ${cell.day}${isToday ? ', today' : ''}, training load ${cell.trainingLoad}`}
+              style={[
+                styles.cell,
+                styles.dayCell,
+                {backgroundColor: bg},
+                isToday && styles.todayCell,
+              ]}
               onPress={() => {
                 // Placeholder for workout log navigation.
               }}>
@@ -187,6 +202,10 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  todayCell: {
+    borderWidth: 2,
+    borderColor: colors.accentBlue,
   },
   dayNumber: {
     fontSize: 13,
