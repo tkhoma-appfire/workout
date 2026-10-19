@@ -26,9 +26,12 @@ export function formatGroupedNumber(value: unknown): string {
   return numeric < 0 ? `-${grouped}` : grouped;
 }
 
-export function formatAvgCaloriesPerSession(data: WorkoutData): string {
+export function formatAvgCaloriesPerSession(
+  data: WorkoutData,
+  periodNoun = 'month',
+): string {
   if (data.totalElements === 0) {
-    return 'No sessions this month';
+    return `No sessions this ${periodNoun}`;
   }
   const avg = Math.round(data.statistics.calories / data.totalElements);
   return `Avg ${formatGroupedNumber(avg)} kcal / session`;
@@ -83,9 +86,12 @@ export function formatMinutesAsMmSs(totalMinutes: number): string {
   return `${normalizedMinutes}:${String(normalizedSeconds).padStart(2, '0')}`;
 }
 
-export function formatAvgMinutesPerSession(data: WorkoutData): string {
+export function formatAvgMinutesPerSession(
+  data: WorkoutData,
+  periodNoun = 'month',
+): string {
   if (data.totalElements === 0) {
-    return 'No sessions this month';
+    return `No sessions this ${periodNoun}`;
   }
   const totalMinutes = parseExerciseTimeToMinutes(
     data.statistics.exerciseTime,

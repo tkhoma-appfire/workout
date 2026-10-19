@@ -115,12 +115,7 @@ function daysInCalendarMonth(
   );
 }
 
-/** Longest consecutive run inside the month; ties pick the latest run in the month. */
-export function longestStreakRangeInCalendarMonth(
-  workouts: WorkoutType[],
-  monthAnchor: Date,
-): StreakDateRange | null {
-  const days = daysInCalendarMonth(workouts, monthAnchor);
+function longestStreakRangeInDays(days: string[]): StreakDateRange | null {
   if (days.length === 0) {
     return null;
   }
@@ -157,6 +152,33 @@ export function longestStreakRangeInCalendarMonth(
   considerRun();
 
   return best.length > 0 ? best : null;
+}
+
+/** Longest consecutive run inside the month; ties pick the latest run in the month. */
+export function longestStreakRangeInCalendarMonth(
+  workouts: WorkoutType[],
+  monthAnchor: Date,
+): StreakDateRange | null {
+  return longestStreakRangeInDays(daysInCalendarMonth(workouts, monthAnchor));
+}
+
+export function longestStreakRangeInDateSpan(
+  workouts: WorkoutType[],
+  startIso: string,
+  endIso: string,
+): StreakDateRange | null {
+  const days = uniqueSortedWorkoutDays(workouts).filter(
+    day => day >= startIso && day <= endIso,
+  );
+  return longestStreakRangeInDays(days);
+}
+
+export function longestStreakInDateSpan(
+  workouts: WorkoutType[],
+  startIso: string,
+  endIso: string,
+): number {
+  return longestStreakRangeInDateSpan(workouts, startIso, endIso)?.length ?? 0;
 }
 
 export function formatStreakDateRange(startIso: string, endIso: string): string {

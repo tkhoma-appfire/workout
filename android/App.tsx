@@ -4,6 +4,7 @@ import {SafeAreaProvider, SafeAreaView} from 'react-native-safe-area-context';
 import AppTabBar, {type AppTab} from './src/components/AppTabBar';
 import FavoritesScreen from './src/screens/FavoritesScreen';
 import MonthOverviewScreen from './src/screens/MonthOverviewScreen';
+import WeekOverviewScreen from './src/screens/WeekOverviewScreen';
 import {colors} from './src/theme';
 
 function App(): React.JSX.Element {
@@ -14,7 +15,9 @@ function App(): React.JSX.Element {
       <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
         <StatusBar barStyle="light-content" backgroundColor={colors.screen} />
         <View style={styles.body}>
-          {activeTab === 'month' ? (
+          {activeTab === 'week' ? (
+            <WeekOverviewScreen />
+          ) : activeTab === 'month' ? (
             <MonthOverviewScreen />
           ) : (
             <FavoritesScreen />

@@ -64,30 +64,37 @@ export function getStreakPresentation(summary: StreakSummary): StreakPresentatio
   };
 }
 
-export function getMonthStreakPresentation(
+export function getRangeStreakPresentation(
   streakRange: StreakDateRange | null,
-  monthName: string,
+  emptyFooter: string,
 ): StreakPresentation {
-  const longestInMonth = streakRange?.length ?? 0;
+  const longest = streakRange?.length ?? 0;
   let iconVariant: StreakIconVariant = 'idle';
-  if (longestInMonth >= 5) {
+  if (longest >= 5) {
     iconVariant = 'peak';
-  } else if (longestInMonth >= 3) {
+  } else if (longest >= 3) {
     iconVariant = 'roll';
-  } else if (longestInMonth === 2) {
+  } else if (longest === 2) {
     iconVariant = 'building';
-  } else if (longestInMonth === 1) {
+  } else if (longest === 1) {
     iconVariant = 'start';
   }
 
   const footer =
     streakRange && streakRange.length > 0
       ? formatStreakDateRange(streakRange.start, streakRange.end)
-      : `No streak in ${monthName}`;
+      : emptyFooter;
 
   return {
     footer,
     badgeLabel: null,
     iconVariant,
   };
+}
+
+export function getMonthStreakPresentation(
+  streakRange: StreakDateRange | null,
+  monthName: string,
+): StreakPresentation {
+  return getRangeStreakPresentation(streakRange, `No streak in ${monthName}`);
 }

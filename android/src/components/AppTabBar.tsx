@@ -3,7 +3,7 @@ import {Pressable, StyleSheet, Text, View} from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {colors} from '../theme';
 
-export type AppTab = 'month' | 'favorites';
+export type AppTab = 'week' | 'month' | 'favorites';
 
 type AppTabBarProps = {
   activeTab: AppTab;
@@ -18,6 +18,11 @@ export default function AppTabBar({
 
   return (
     <View style={[styles.bar, {paddingBottom: Math.max(insets.bottom, 8)}]}>
+      <TabButton
+        label="Week Overview"
+        active={activeTab === 'week'}
+        onPress={() => onChange('week')}
+      />
       <TabButton
         label="Month Overview"
         active={activeTab === 'month'}
@@ -82,7 +87,7 @@ const styles = StyleSheet.create({
   },
   label: {
     color: colors.textMuted,
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: '600',
     textAlign: 'center',
   },
