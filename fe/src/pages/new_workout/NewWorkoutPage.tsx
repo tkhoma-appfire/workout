@@ -12,6 +12,7 @@ import { CalendarContext } from "@/context/CalendarContextProvider";
 import { CurrentPeriodContext } from "@/context/CurrentPeriodContextProvider";
 import WorkoutDateAndTimeFields from "@/components/workout/WorkoutDateAndTimeFields";
 import { validateWorkoutStep, validationWarningForStep } from "@/utils/workoutForm";
+import { currentHhMmLocal } from "@/utils/timeFormat";
 const steps = ["Workout Metrics", "Exercises", "Basic Info"];
 
 const todayLocal = () => format(new Date(), "yyyy-MM-dd");
@@ -35,7 +36,7 @@ const NewWorkoutPage = () => {
     trainingLoad: 0,
     exercises: [],
     date: currentDate,
-    workoutTime: "",
+    workoutTime: currentHhMmLocal(),
     rounds: createDefaultRounds(),
     comment: "",
   }));

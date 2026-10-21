@@ -21,6 +21,14 @@ export function isValidMmSs(value: string): boolean {
   return seconds >= 0 && seconds < 60 && (minutes > 0 || seconds > 0);
 }
 
+/** Local clock time for workout time defaults, e.g. `09:42`. */
+export function currentHhMmLocal(): string {
+  const now = new Date();
+  const hours = String(now.getHours());
+  const minutes = String(now.getMinutes()).padStart(2, "0");
+  return `${hours}:${minutes}`;
+}
+
 /** Workout clock time `hh:mm` (hours 0–23, minutes 0–59). */
 export function formatHhMmInput(val: string): string {
   const digits = val.replace(/\D/g, "").slice(0, 4);
